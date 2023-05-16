@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 from imutils.object_detection import non_max_suppression
 
-img_board = cv2.imread("cb.png")
-img_piece = cv2.imread("bishop_trans.png", cv2.IMREAD_UNCHANGED)
+img_board = cv2.imread("assets/cb.png")
+img_piece = cv2.imread("assets/black_bishop.png", cv2.IMREAD_UNCHANGED)
 
 img_board_gray = cv2.cvtColor(img_board, cv2.COLOR_BGR2GRAY)
 img_piece_gray = cv2.cvtColor(img_piece, cv2.COLOR_BGR2GRAY)
