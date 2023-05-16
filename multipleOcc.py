@@ -1,30 +1,32 @@
 import cv2
 import numpy as np
 
-# Load input image
+
 img = cv2.imread("cb.png")
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-template = cv2.imread("bishop.png", 0)
-h, w = template.shape
+template = cv2.imread("white_knight.png", 0)
 
-# Apply template matching to find matches between input image and template
-res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
-threshold = 0.8
 
-# Find coordinates of matches above threshold
+kernel = np.ones((15, 15), np.uint8)
+board = cv2.morphologyEx(gray, cv2.MORPH_GRADIENT, kernel)
+piece = cv2.morphologyEx(template, cv2.MORPH_GRADIENT, kernel)
+
+h, w = int(img.shape[0] / 8), int(img.shape[1] / 8)
+
+res = cv2.matchTemplate(board, piece, cv2.TM_CCOEFF_NORMED)
+threshold = 0.5
+
 loc = np.where(res >= threshold)
 
-# Get rid of duplicate matches
 rects = []
 for pt in zip(*loc[::-1]):
     rects.append((pt[0], pt[1], w, h))
-suppressed_rects = cv2.dnn.NMSBoxes(rects, res[loc], 0.5, 0.5)
 
-# Draw remaining bounding boxes onto original image
-for i in suppressed_rects:
-    x, y, _, _ = rects[i]
-    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 10)
+grects, _ = cv2.groupRectangles(rects, 1, 1)
 
-# Display output image
-cv2.imshow("Chess", img)
+for i in range(len(grects)):
+    x, y, h, w = grects[i]
+    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 5)
+
+cv2.imshow("Chess", board)
 cv2.waitKey()
