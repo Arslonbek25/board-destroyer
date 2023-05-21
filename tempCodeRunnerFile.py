@@ -1,2 +1,1 @@
-mg_piece)
-    cv2.waitKey()
+square_size

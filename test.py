@@ -27,7 +27,7 @@ while min_val < 0.1:
     # Draw a rectangle around the matching location
     top_left = min_loc
     bottom_right = (top_left[0] + img_piece.shape[1], top_left[1] + img_piece.shape[0])
-    cv2.rectangle(img_board, top_left, bottom_right, (0, 0, 255), 2)
+    cv2.rectangle(img_board, top_left, bottom_right, (0, 0, 255), 15)
 
     #overwrite the portion of the result that has the match:
     h1 = top_left[1]-h//2
