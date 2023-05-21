@@ -22,7 +22,7 @@ piece_names = {
 }
 
 def find_piece(board, piece):
-    square_size = int((board.shape[0] / 8 + board.shape[1] / 8) / 2 * 0.97)
+    square_size = int((board.shape[0] / 8 + board.shape[1] / 8) / 2 * 0.99)
 
     img_piece = cv2.resize(
         cv2.imread(f"assets/{piece}.png", cv2.IMREAD_UNCHANGED),
