@@ -3,8 +3,18 @@ import numpy as np
 from imutils.object_detection import non_max_suppression
 
 # TODO: save images in memory after loading them to save computing time
-img_board = cv2.imread("assets/cb.png")
+
+# Load and resize the image
+img_board = cv2.imread("assets/cb4.png")
+resize_factor = 800 / (sum(img_board.shape[:2]) / 2)
+img_board = cv2.resize(img_board, (0, 0), fx=resize_factor, fy=resize_factor)
+
+# Convert to grayscale
 img_board_gray = cv2.cvtColor(img_board, cv2.COLOR_BGR2GRAY)
+
+# Calculate the square size
+bh, bw = img_board_gray.shape
+sq_size = int((bh + bw) / 16 * 0.99)
 
 piece_names = {
     "white_king": "K",
@@ -20,36 +30,58 @@ piece_names = {
     "black_knight": "n",
     "black_pawn": "p",
 }
+coords = np.zeros((8, 8), dtype=np.dtype("U1"))
+
 
 def find_piece(board, piece):
-    square_size = int((board.shape[0] / 8 + board.shape[1] / 8) / 2 * 0.99)
-
     img_piece = cv2.resize(
         cv2.imread(f"assets/{piece}.png", cv2.IMREAD_UNCHANGED),
-        (square_size, square_size),
+        (sq_size, sq_size),
     )
     img_piece_gray = cv2.cvtColor(img_piece, cv2.COLOR_BGR2GRAY)
-
     h, w = img_piece_gray.shape
+
     img_piece_inverted = cv2.bitwise_not(img_piece_gray)
     if piece.startswith("black"):
-        mask = cv2.threshold(img_piece_inverted, 100, 255, cv2.THRESH_BINARY)[1]
+        mask = cv2.threshold(img_piece_inverted, 70, 255, cv2.THRESH_BINARY)[1]
     else:
         mask = img_piece[:, :, 3]
 
     matches = cv2.matchTemplate(board, img_piece_gray, cv2.TM_SQDIFF_NORMED, mask=mask)
-    locs = np.where(matches <= 0.1)
+    locs = np.where(matches <= 0.095)
     rects = [(x, y, x + w, y + h) for x, y in zip(*locs[::-1])]
 
     return non_max_suppression(np.array(rects))
 
 
 # Highlight all pieces
-for piece_name in piece_names.keys():
+for piece_name, key in piece_names.items():
     pieces = find_piece(img_board_gray, piece_name)
     for piece in pieces:
         x, y, h, w = piece
-        cv2.rectangle(img_board, (x, y), (h, w), (0, 0, 255), 5)
+        posX = round(8 * x / bw)
+        posY = round(8 * y / bh)
+        cv2.rectangle(img_board, (x, y), (h, w), (0, 0, 255), 3)
+        coords[posY, posX] = key
+
+
+def get_fen(coords):
+    fen = ""
+    for row in coords:
+        empty_sqs = 0
+        for square_i, square in enumerate(row):
+            if square == "":
+                empty_sqs += 1
+            if (square != "" or square_i == 7) and empty_sqs:
+                fen += str(empty_sqs)
+                empty_sqs = 0
+            fen += square
+        fen += "/"
+    return fen.rstrip("/")
+
+
+fen = get_fen(coords)
+print(fen)
 
 cv2.imshow("Chess", img_board)
 cv2.waitKey()
