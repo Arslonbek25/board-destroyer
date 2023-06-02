@@ -5,7 +5,7 @@ from imutils.object_detection import non_max_suppression
 # TODO: save images in memory after loading them to save computing time
 
 # Load and resize the image
-img_board = cv2.imread("assets/cb4.png")
+img_board = cv2.imread("assets/cb.png")
 resize_factor = 800 / (sum(img_board.shape[:2]) / 2)
 img_board = cv2.resize(img_board, (0, 0), fx=resize_factor, fy=resize_factor)
 
@@ -14,7 +14,7 @@ img_board_gray = cv2.cvtColor(img_board, cv2.COLOR_BGR2GRAY)
 
 # Calculate the square size
 bh, bw = img_board_gray.shape
-sq_size = int((bh + bw) / 16 * 0.99)
+sq_size = int((bh + bw) / 16 * 0.98)
 
 piece_names = {
     "white_king": "K",
@@ -77,7 +77,12 @@ def get_fen(coords):
                 empty_sqs = 0
             fen += square
         fen += "/"
-    return fen.rstrip("/")
+    return "{} {}".format(fen.rstrip("/"), turn)
+
+
+turn = None
+while turn not in ["b", "w"]:
+    turn = input("Whose turn is it? (b/w): ")
 
 
 fen = get_fen(coords)
