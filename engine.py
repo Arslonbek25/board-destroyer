@@ -9,6 +9,6 @@ engine.configure({"Skill Level": 12})
 def get_best_move(fen):
     board = chess.Board(fen)
     print(board)
-    result = engine.play(board, chess.engine.Limit(time=.5))
+    result = engine.play(board, chess.engine.Limit(time=0.5))
     engine.quit()
     return result
