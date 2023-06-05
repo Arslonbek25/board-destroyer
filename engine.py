@@ -17,15 +17,17 @@ piece_names = {
     "black_pawn": "p",
 }
 
-engine_path = "/usr/local/bin/stockfish"
-engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-engine.configure({"Skill Level": 12})
+
+def init_engine():
+    engine_path = "/usr/local/bin/stockfish"
+    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
+    engine.configure({"Skill Level": 12})
+    return engine
 
 
-def get_best_move(fen):
+def get_best_move(fen, engine):
     board = chess.Board(fen)
     result = engine.play(board, chess.engine.Limit(time=0.1))
-    engine.quit()
     return str(result.move)
 
 

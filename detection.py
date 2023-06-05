@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from imutils.object_detection import non_max_suppression
+
 from engine import piece_names
 
 
@@ -49,7 +50,7 @@ def find_piece(board, piece, sq_size):
 def find_all_pieces(board):
     coords = np.zeros((8, 8), dtype=np.dtype("U1"))
     for piece_name, key in piece_names.items():
-        pieces = find_piece(board.img_gray, piece_name, board.sq_size)
+        pieces = find_piece(board.img, piece_name, board.sq_size)
         for piece in pieces:
             x, y, h, w = piece
             posX = round(8 * x / board.bw)
