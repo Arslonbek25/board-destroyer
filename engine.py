@@ -2,7 +2,6 @@ import chess
 import chess.engine
 import numpy as np
 
-
 piece_names = {
     "white_king": "K",
     "white_queen": "Q",
