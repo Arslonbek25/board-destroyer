@@ -25,7 +25,9 @@ class BoardProcessor:
 
     def resize(self):
         scale = 800 / self.img.shape[0]
-        self.img = cv2.resize(self.img, (0, 0), fx=scale, fy=scale)
+        self.img = cv2.resize(
+            self.img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR
+        )
 
     def process_board(self):
         self.load_image()

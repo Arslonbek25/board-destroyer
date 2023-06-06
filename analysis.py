@@ -16,6 +16,7 @@ piece_names = {
     "black_knight": "n",
     "black_pawn": "p",
 }
+is_game_over = False
 
 
 def init_engine():
@@ -27,7 +28,8 @@ def init_engine():
 
 def get_best_move(fen, engine):
     board = chess.Board(fen)
-    result = engine.play(board, chess.engine.Limit(time=0.1))
+    is_game_over = board.is_game_over()
+    result = engine.play(board, chess.engine.Limit(time=0.5))
     return str(result.move)
 
 

@@ -1,6 +1,6 @@
 import pyautogui as pg
 
-from engine import get_best_move, san_to_coords
+from analysis import get_best_move, san_to_coords
 
 
 def get_prop(board):
@@ -13,8 +13,8 @@ def get_prop(board):
 def play_move(move_coords, prop):
     move_coords /= prop
     x1, y1, x2, y2 = move_coords
-    pg.moveTo(x1, y1, duration=0.3)
-    pg.moveTo(x2, y2, duration=0.3)
+    pg.moveTo(x1, y1, duration=0.1)
+    pg.moveTo(x2, y2, duration=0.1)
 
 
 def play_best_move(board, engine, fen):
