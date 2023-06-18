@@ -16,20 +16,34 @@ piece_names = {
     "black_knight": "n",
     "black_pawn": "p",
 }
+piece_threshold = {
+    "B": 0.1,  # bishop
+    "b": 0.1,  # bishop_black
+    "K": 0.1,  # king
+    "k": 0.2,  # king_black
+    "N": 0.1,  # knight
+    "n": 0.1,  # knight_black
+    "P": 0.1,  # pawn
+    "p": 0.2,  # pawn_black
+    "Q": 0.1,  # queen
+    "q": 0.2,  # queen_black
+    "R": 0.1,  # rook
+    "r": 0.2,  # rook_black
+}
 is_game_over = False
 
 
 def init_engine():
     engine_path = "/usr/local/bin/stockfish"
     engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-    engine.configure({"Skill Level": 12})
+    engine.configure({"Skill Level": 20})
     return engine
 
 
 def get_best_move(fen, engine):
     board = chess.Board(fen)
     is_game_over = board.is_game_over()
-    result = engine.play(board, chess.engine.Limit(time=0.5))
+    result = engine.play(board, chess.engine.Limit(time=1))
     return str(result.move)
 
 

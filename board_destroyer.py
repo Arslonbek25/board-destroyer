@@ -5,12 +5,28 @@ from board_processor import BoardProcessor
 from controls import get_turn, play_best_move
 from detection import find_all_pieces
 
-board = BoardProcessor("assets/screenshot-4.png")
-board.process_board()
+
+board = BoardProcessor()
+while True:
+    try:
+        board.process_board()
+        break
+    except:
+        print("Chessboard not detected")
+
 engine = init_engine()
 
 turn = get_turn()
+first_turn = turn
 prev_pos = None
+
+
+def change_turn():
+    global turn
+    if turn == "w":
+        turn = "b"
+    else:
+        turn = "w"
 
 
 def run():
@@ -18,14 +34,23 @@ def run():
         engine.quit()
         return
 
-    global prev_pos
-    board.update()
-    pos = find_all_pieces(board)
+    global prev_pos, first_turn, turn
+    try:
+        board.update()
+        pos = find_all_pieces(board)
+    except Exception as e:
+        print("can't update")
+        raise e
+        return threading.Timer(0.1, run).start()
+    fen = get_fen(pos, turn)
+    print(fen)
     if not (prev_pos == pos).all():
-        fen = get_fen(pos, turn)
-        play_best_move(board, engine, fen)
+        # global turn, first_turn
+        # if turn == first_turn:
+            # play_best_move(board, engine, fen)
+        change_turn()
     prev_pos = pos
-    threading.Timer(0.1, run).start()
+    threading.Timer(1, run).start()
 
 
 run()

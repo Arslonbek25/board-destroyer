@@ -14,13 +14,13 @@ def play_move(move_coords, prop):
     move_coords /= prop
     x1, y1, x2, y2 = move_coords
     pg.moveTo(x1, y1, duration=0.1)
-    pg.moveTo(x2, y2, duration=0.1)
+    pg.dragTo(x2, y2, duration=0.4, button="left")
 
 
 def play_best_move(board, engine, fen):
     best_move = get_best_move(fen, engine)
     move_coords = san_to_coords(best_move, board.sq_size_orig)
-
+    print(best_move)
     move_coords[:2] += board.topLeftCorner - board.sq_size / 2
     move_coords[2:] += board.topLeftCorner - board.sq_size / 2
 
