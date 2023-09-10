@@ -38,10 +38,6 @@ class BoardProcessor:
         self.imgbgr = screenshot
         self.img = gray
 
-        # cv2.imshow("Screenshot", screenshot)
-        # cv2.waitKey()
-        # return img
-
     def capture_screenshot_cropped(self):
         monitor = {
             "top": self.corners[0, 1] / 2,
@@ -68,12 +64,12 @@ class BoardProcessor:
 
         # Calculate original square sizes (for mouse movement)
         self.bh_orig, self.bw_orig, self.sq_size_orig = self.get_dims()
-        print("ORIG SIZES", self.bw_orig, self.bw_orig)
+        # print("ORIG SIZES", self.bw_orig, self.bw_orig)
         self.resize()
 
         # Calculate new size and dimensions (for template matching)
         self.bh, self.bw, self.sq_size = self.get_dims()
-        print("SIZES", self.bw, self.bw)
+        # print("SIZES", self.bw, self.bw)
 
     def get_props_corners(self):
         self.prop = get_prop(self.img)
@@ -83,7 +79,3 @@ class BoardProcessor:
     def update(self):
         self.capture_screenshot_cropped()
         self.resize()
-        cv2.imwrite("screenshot.png", self.imgbgr)
-        # cv2.imwrite("screenshot.png", self.img)
-        # print(self.img.shape)
-        # print(self.sq_size)

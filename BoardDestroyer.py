@@ -2,9 +2,9 @@ import threading
 
 from analysis import get_fen, init_engine, is_game_over
 from board_processor import BoardProcessor
-from controls import get_turn, play_best_move
-from detection import find_all_pieces
+from controls import get_turn, play_best_move, get_color
 import detect
+import numpy as np
 
 board = BoardProcessor()
 while True:
@@ -17,6 +17,7 @@ while True:
 engine = init_engine()
 
 turn = get_turn()
+color = get_color()
 first_turn = turn
 prev_pos = None
 
@@ -46,13 +47,11 @@ def run():
     fen = get_fen(pos, turn)
     print(fen)
     if not (prev_pos == pos).all():
-        # global turn, first_turn
-        # if turn == first_turn:
-        # play_best_move(board, engine, fen)
+        if color == turn:
+            play_best_move(board, engine, fen)
         change_turn()
-    print(turn)
-    prev_pos = pos
-    play_best_move(board, engine, fen)
+    print(color, turn)
+    prev_pos = np.copy(pos)
     threading.Timer(1, run).start()
 
 

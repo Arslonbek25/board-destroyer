@@ -26,7 +26,7 @@ piece_names = {
 
 def find_pieces(board):
     pos = np.zeros((8, 8), dtype=np.dtype("U1"))
-    res = model.predict(board)[0]
+    res = model.predict(board, verbose=False)[0]
     coords = res.boxes.xyxy.numpy().astype(int)[:, 0:2]
     labels = [model.names[int(c)] for c in res.boxes.cls]
     board_height, board_width, _ = board.shape

@@ -14,7 +14,7 @@ def play_move(move_coords, prop):
     move_coords /= prop
     x1, y1, x2, y2 = move_coords
     pg.moveTo(x1, y1, duration=0.1)
-    pg.dragTo(x2, y2, duration=0.4, button="left")
+    pg.dragTo(x2, y2, duration=0.1, button="left")
 
 
 def play_best_move(board, engine, fen):
@@ -31,4 +31,11 @@ def get_turn():
     turn = ""
     while turn not in ["b", "w"]:
         turn = input("Whose turn is it? (b/w): ")
+    return turn
+
+
+def get_color():
+    turn = ""
+    while turn not in ["b", "w"]:
+        turn = input("\nWhat color are you playing? (b/w): ")
     return turn
