@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 12
+names: ['Black Bishop', 'Black Castle', 'Black King', 'Black Knight', 'Black Pawn', 'Black Queen', 'White Bishop', 'White Castle', 'White King', 'White Knight', 'White Pawn', 'White Queen']
+
+roboflow:
+  workspace: new-workspace-4cton
+  project: chess.com-squares
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/new-workspace-4cton/chess.com-squares/dataset/4

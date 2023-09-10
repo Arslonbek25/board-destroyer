@@ -3,6 +3,7 @@ import numpy as np
 from imutils.object_detection import non_max_suppression
 
 from analysis import piece_names, piece_threshold
+import detect
 
 
 def is_square(A, threshold=10):
