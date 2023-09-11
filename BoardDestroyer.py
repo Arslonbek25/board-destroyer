@@ -47,12 +47,14 @@ def run():
     fen = get_fen(pos, turn)
     print(fen)
     if not (prev_pos == pos).all():
+        print("Position changed")
         if color == turn:
+            print("Playing the move")
             play_best_move(board, engine, fen)
         change_turn()
     print(color, turn)
     prev_pos = np.copy(pos)
-    threading.Timer(1, run).start()
+    threading.Timer(0.1, run).start()
 
 
 run()

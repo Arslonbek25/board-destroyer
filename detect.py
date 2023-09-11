@@ -4,9 +4,8 @@ import cv2 as cv
 import numpy as np
 from ultralytics import YOLO
 
-model_path = os.path.join(os.getcwd(), "model", "weights", "best.pt")
+model_path = os.path.join(os.getcwd(), "YOLO_model", "weights", "best.pt")
 model = YOLO(model_path)
-
 
 piece_names = {
     "white-king": "K",

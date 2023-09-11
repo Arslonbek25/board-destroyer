@@ -22,7 +22,7 @@ class BoardProcessor:
         ]
 
     def resize(self):
-        scale = 800 / self.img.shape[0]
+        scale = 640 / self.img.shape[0]
         self.img = cv2.resize(
             self.img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR
         )
@@ -79,3 +79,5 @@ class BoardProcessor:
     def update(self):
         self.capture_screenshot_cropped()
         self.resize()
+        # Save screenshot
+        cv2.imwrite("screenshot.png", self.imgbgr)
