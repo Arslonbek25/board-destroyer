@@ -1,23 +1,19 @@
 import threading
 
-from analysis import get_fen, init_engine, is_game_over
-from board_processor import BoardProcessor
-from controls import get_turn, play_best_move, get_color
-import detect
+import cv2 as cv
 import numpy as np
 
-board = BoardProcessor()
-while True:
-    try:
-        board.process_board()
-        break
-    except:
-        print("Chessboard not detected")
+import control
+import detect
+from analysis import get_fen, init_engine, is_game_over
+from Board import Board
+
+board = Board()
 
 engine = init_engine()
 
-turn = get_turn()
-color = get_color()
+turn = control.get_turn()
+color = control.get_color()
 first_turn = turn
 prev_pos = None
 
@@ -36,21 +32,16 @@ def run():
         return
 
     global prev_pos, first_turn, turn
-    try:
-        board.update()
-        pos = detect.find_pieces(board.imgbgr[:, :, :3])
-        # pos = find_all_pieces(board)
-    except Exception as e:
-        print("can't update")
-        # raise e
-        # return threading.Timer(0.1, run).start()
+
+    board.update()
+    pos = detect.find_pieces(board.img[:, :, :3])
     fen = get_fen(pos, turn)
     print(fen)
     if not (prev_pos == pos).all():
         print("Position changed")
         if color == turn:
             print("Playing the move")
-            play_best_move(board, engine, fen)
+            control.play_best_move(board, engine, fen)
         change_turn()
     print(color, turn)
     prev_pos = np.copy(pos)
