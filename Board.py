@@ -16,6 +16,9 @@ class Board:
         self._capture_screenshot(cropped=True)
         self._resize()
 
+    def save_screenshot(self, filename="screenshot.png"):
+        cv2.imwrite(filename, self.img)
+
     def _init_board(self):
         while True:
             try:
@@ -27,6 +30,7 @@ class Board:
     def _find_board(self):
         self._capture_screenshot()
         self._find_corners()
+        self._set_scale()
         self._crop_to_board()
         self.sq_size_orig = self._get_sq_size()
         self._resize()
@@ -46,7 +50,6 @@ class Board:
 
     def _find_corners(self):
         self.corners = getChessboardCorners(self.img)
-        self.scale = self._get_scale()
 
     def _get_sq_size(self):
         return sum(self.img.shape[:2]) / 16
@@ -63,5 +66,5 @@ class Board:
             self.img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR
         )
 
-    def _get_scale(self):
-        return self.img.shape[0] / pg.size()[1]
+    def _set_scale(self):
+        self.scale = self.img.shape[0] / pg.size()[1]

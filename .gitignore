@@ -1,3 +1,5 @@
+screenshots/
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json

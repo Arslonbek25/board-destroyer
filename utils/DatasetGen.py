@@ -1,11 +1,15 @@
+import os
 import platform
 import random
 import time
 import urllib.parse
 import webbrowser
+from datetime import datetime
 
 import chess
 import pyautogui
+
+from Board import Board
 
 
 def random_pawns(piece):
@@ -17,13 +21,12 @@ def random_pawns(piece):
         .replace("11", "2")
     )
 
-
-def generate_balanced_chess_com_links(n, num_moves=10):
+def generate_balanced_chess_com_links(n_pos, num_moves=10):
     base_url = "https://www.chess.com/practice/custom?"
     links = []
-    fen = f"rnbqkbnr/{random_pawns('p')}/8/8/8/8/{random_pawns('P')}/RNBQKBNR w KQkq - 0 1"
 
-    for _ in range(n):
+    for _ in range(n_pos):
+        fen = f"rnbqkbnr/{random_pawns('p')}/8/8/8/8/{random_pawns('P')}/RNBQKBNR w KQkq - 0 1"
         board = chess.Board(fen)
         moves_made = []
 
@@ -35,12 +38,14 @@ def generate_balanced_chess_com_links(n, num_moves=10):
 
             if not non_capture_moves:
                 moves_made = []
-                board.set_fen(fen)
                 break
 
             move = random.choice(non_capture_moves)
             moves_made.append(move.uci())
             board.push(move)
+
+        if len(moves_made) != num_moves:
+            continue
 
         encoded_moves = "%20".join(moves_made)
         links.append(
@@ -51,20 +56,27 @@ def generate_balanced_chess_com_links(n, num_moves=10):
 
 
 def open_and_close_links(links, wait_time=5):
+    board = None
     for link in links:
-        print(link)
         webbrowser.open(link)
         time.sleep(wait_time)
 
-        # close the tab
+        if board is None:
+            board = Board()
+
+        now = datetime.now()
+        id = now.strftime("%Y%m%d_%H%M%S_%f")
+        board.update()
+        board.save_screenshot(f"screenshots/screenshot{id}.png")
         if platform.system() == "Darwin":  # macOS
-            print("CLOSING TAB")
             pyautogui.hotkey("command", "w")
         elif platform.system() == "Windows":
             pyautogui.hotkey("ctrl", "w")
-        time.sleep(1)
 
 
 if __name__ == "__main__":
-    links = generate_balanced_chess_com_links(5, 95)
+    os.makedirs("screenshots", exist_ok=True)
+
+    # num_moves has to be an even number to prevent the bot making a move
+    links = generate_balanced_chess_com_links(10, num_moves=64)
     open_and_close_links(links)
