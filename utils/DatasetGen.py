@@ -76,5 +76,5 @@ if __name__ == "__main__":
     os.makedirs("screenshots", exist_ok=True)
 
     # num_moves has to be an even number to prevent the bot making a move
-    links = generate_balanced_chess_com_links(10, num_moves=64)
+    links = generate_balanced_chess_com_links(n_pos=10, num_moves=64)
     open_and_close_links(links)

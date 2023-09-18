@@ -18,9 +18,11 @@ class Board:
         self._capture_screenshot(cropped=True)
         self._resize()
 
-    def save_screenshot(self, filename=f"screenshots/screenshot{id}.png"):
-        now = datetime.now()
-        id = now.strftime("%Y%m%d_%H%M%S_%f")
+    def save_screenshot(self, filename=None):
+        if not filename:
+            now = datetime.now()
+            id = now.strftime("%Y%m%d_%H%M%S_%f")
+            filename = f"screenshots/screenshot{id}.png"
         cv2.imwrite(filename, self.img)
 
     def _init_board(self):
