@@ -34,8 +34,9 @@ def run():
     global prev_pos, first_turn, turn
 
     board.update()
+    board.save_screenshot()
     pos = detect.find_pieces(board.img[:, :, :3])
-    fen = get_fen(pos, turn)
+    fen = get_fen(pos, turn, color)
     print(fen)
     if not (prev_pos == pos).all():
         print("Position changed")

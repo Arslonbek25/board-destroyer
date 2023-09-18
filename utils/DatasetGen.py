@@ -4,7 +4,6 @@ import random
 import time
 import urllib.parse
 import webbrowser
-from datetime import datetime
 
 import chess
 import pyautogui
@@ -20,6 +19,7 @@ def random_pawns(piece):
         .replace("111", "3")
         .replace("11", "2")
     )
+
 
 def generate_balanced_chess_com_links(n_pos, num_moves=10):
     base_url = "https://www.chess.com/practice/custom?"
@@ -64,10 +64,8 @@ def open_and_close_links(links, wait_time=5):
         if board is None:
             board = Board()
 
-        now = datetime.now()
-        id = now.strftime("%Y%m%d_%H%M%S_%f")
         board.update()
-        board.save_screenshot(f"screenshots/screenshot{id}.png")
+        board.save_screenshot()
         if platform.system() == "Darwin":  # macOS
             pyautogui.hotkey("command", "w")
         elif platform.system() == "Windows":
