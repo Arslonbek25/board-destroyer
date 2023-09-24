@@ -1,26 +1,7 @@
-import chess
-import chess.engine
 import numpy as np
-import random
-
-is_game_over = False
 
 
-def init_engine():
-    engine_path = "/usr/local/bin/stockfish"
-    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-    engine.configure({"Skill Level": 15})
-    return engine
-
-
-def get_best_move(fen, engine):
-    board = chess.Board(fen)
-    is_game_over = board.is_game_over()
-    result = engine.play(board, chess.engine.Limit(time=random.randint(10, 35) / 10))
-    return str(result.move)
-
-
-def get_fen(coords, turn, color):
+def get_fen(coords, turn):
     fen = ""
     for row in coords:
         empty_sqs = 0
@@ -33,8 +14,6 @@ def get_fen(coords, turn, color):
             fen += square
         fen += "/"
     return "{} {}".format(fen.rstrip("/"), turn)
-    # if color == "w":
-    # return "{} {}".format(fen.rstrip("/")[::-1], turn)
 
 
 def san_to_coords(san, sq_size):
@@ -50,29 +29,172 @@ def san_to_coords(san, sq_size):
     return coords
 
 
-# if __name__ == "__main__":
-# pos = [
-#     ["" "K" "" "" "" "B" "" ""]["N" "P" "R" "B" "" "P" "" ""][
-#         "" "p" "" "" "" "" "" "P"
-#     ]["" "" "P" "" "" "p" "" ""]["" "" "" "" "" "" "" ""][
-#         "q" "" "" "" "b" "" "" ""
-#     ][
-#         "p" "" "" "" "" "" "" "Q"
-#     ][
-#         "" "k" "r" "" "" "" "R" ""
-#     ]
-# ]
-# fen = "r1bq1rk1/1pp1nppp/1b1p1n2/pP2p3/PNB1P3/1QPP1N2/5PPP/RNB1K2R w"
-# board = chess.Board(fen)
-# engine_path = "/usr/local/bin/stockfish"
+def to_uci(x, y):
+    return chr(97 + y) + str(8 - x)
 
-# engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-# info = engine.analyse(board, chess.engine.Limit(time=0.1))
-# best_move = info["pv"][0]
-# print(best_move)
-# engine = init_engine()
-# fen2 = "r1bq1rk1/1pp1nppp/1b1p1n2/pP2p3/PNB1P3/1QPP1N2/5PPP/R1BQK2R w KQ - 0 1"
-# fen = "r1bq1rk1/1pp1nppp/1b1p1n2/pP2p3/PNB1P3/1QPP1N2/5PPP/RNB1K2R w KQ - 0 1"
 
-# print(get_best_move(fen, engine))
-# engine.quit()
+def find_move(before, after):
+    indices_to_files = "abcdefgh"
+    diff = before != after
+    changed_indices = np.argwhere(diff)
+
+    # Find the moved piece's original and new positions
+    moved_piece_pos_before = [pos for pos in changed_indices if before[tuple(pos)]]
+    moved_piece_pos_after = [pos for pos in changed_indices if after[tuple(pos)]]
+
+    if len(changed_indices) == 2:  # Regular move or capture
+        square1, square2 = changed_indices
+        # Identify which square contains the moved piece in 'after'
+        if after[tuple(square1)] != "":
+            from_square, to_square = square2, square1
+        else:
+            from_square, to_square = square1, square2
+
+        from_file, from_rank = from_square[::-1]
+        to_file, to_rank = to_square[::-1]
+        move = f"{indices_to_files[from_file]}{8-from_rank}{indices_to_files[to_file]}{8-to_rank}"
+        return move
+
+    elif len(changed_indices) == 4:
+        # Castling
+        if (
+            "K" in before[tuple(moved_piece_pos_before[0])]
+            or "k" in before[tuple(moved_piece_pos_before[0])]
+        ):
+            if (
+                abs(moved_piece_pos_before[0][1] - moved_piece_pos_after[1][1]) == 2
+            ):  # Kingside
+                return (
+                    "e1g1"
+                    if before[tuple(moved_piece_pos_before[0])] == "K"
+                    else "e8g8"
+                )
+            else:  # Queenside
+                return (
+                    "e1c1"
+                    if before[tuple(moved_piece_pos_before[0])] == "K"
+                    else "e8c8"
+                )
+        # En-passant
+        else:
+            start = moved_piece_pos_before[0]
+            end = moved_piece_pos_after[0]
+            start_file, start_rank = start[::-1]
+            end_file, end_rank = end[::-1]
+            move = f"{indices_to_files[start_file]}{8-start_rank}{indices_to_files[end_file]}{8-end_rank}"
+            return move
+
+    return "error"
+
+
+if __name__ == "__main__":
+    # Tests
+    prev = np.array(
+        [
+            ["r", "n", "b", "q", "k", "b", "n", "r"],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            ["R", "N", "B", "Q", "K", "B", "N", "R"],
+        ],
+        dtype=np.dtype("U1"),
+    )
+
+    after = np.array(
+        [
+            ["r", "n", "b", "q", "k", "b", "n", "r"],
+            ["p", "p", "p", "p", "p", "p", "p", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", "p"],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            ["R", "N", "B", "Q", "K", "B", "N", "R"],
+        ],
+        dtype=np.dtype("U1"),
+    )
+    print(find_move(prev, after))  # e4e5
+
+#     prev = np.array([
+#     ["r", "n", "b", "q", "k", "b", "n", "r"],
+#     ["p", "p", "p", "p", "p", "p", "p", "p"],
+#     ["", "", "", "", "", "", "", ""],
+#     ["", "", "", "", "", "", "", ""],
+#     ["", "", "", "", "", "", "", ""],
+#     ["", "", "", "", "", "", "", ""],
+#     ["P", "P", "P", "P", "P", "P", "P", "P"],
+#     ["R", "N", "B", "Q", "K", "B", "N", "R"]
+# ], dtype=np.dtype("U1"))
+
+#     after = np.array([
+#         ["r", "n", "b", "q", "k", "b", "n", "r"],
+#         ["p", "p", "p", "p", "p", "p", "p", "p"],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "N", "", ""],
+#         ["P", "P", "P", "P", "P", "P", "P", "P"],
+#         ["R", "N", "B", "Q", "K", "B", "", "R"]
+#     ], dtype=np.dtype("U1"))
+#     print(find_move(prev, after))  # g1f3
+
+# prev = np.array(
+#     [
+#         ["r", "n", "b", "q", "k", "b", "n", "r"],
+#         ["p", "p", "p", "p", "p", "p", "p", "p"],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["P", "P", "P", "P", "P", "P", "P", "P"],
+#         ["R", "N", "B", "Q", "K", "B", "N", "R"],
+#     ],
+#     dtype=np.dtype("U1"),
+# )
+
+# after = np.array(
+#     [
+#         ["r", "n", "b", "q", "k", "b", "n", "r"],
+#         ["p", "p", "p", "p", "p", "p", "p", "p"],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "P", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["P", "P", "P", "P", "", "P", "P", "P"],
+#         ["R", "N", "B", "Q", "K", "B", "N", "R"],
+#     ],
+#     dtype=np.dtype("U1"),
+# )
+# print(find_move(prev, after))  # e2e4
+
+# prev = np.array(
+#     [
+#         ["r", "n", "b", "q", "k", "b", "n", "r"],
+#         ["p", "p", "p", "", "p", "p", "p", "p"],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "p", "", "", "", ""],
+#         ["", "", "", "", "P", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["P", "P", "P", "P", "", "P", "P", "P"],
+#         ["R", "N", "B", "Q", "K", "", "", "R"],
+#     ],
+#     dtype=np.dtype("U1"),
+# )
+# after = np.array(
+#     [
+#         ["r", "n", "b", "q", "k", "b", "n", "r"],
+#         ["p", "p", "p", "", "p", "p", "p", "p"],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "P", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["", "", "", "", "", "", "", ""],
+#         ["P", "P", "P", "P", "", "P", "P", "P"],
+#         ["R", "N", "B", "Q", "K", "", "", "R"],
+#     ],
+#     dtype=np.dtype("U1"),
+# )  # Move: d2d4
+
+# print(find_move(prev, after))

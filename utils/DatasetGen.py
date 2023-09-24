@@ -8,7 +8,7 @@ import webbrowser
 import chess
 import pyautogui
 
-from Board import Board
+from board import Board
 
 
 def random_pawns(piece):
@@ -62,6 +62,7 @@ def open_and_close_links(links, wait_time=5):
         time.sleep(wait_time)
 
         if board is None:
+            time.sleep(2)
             board = Board()
 
         board.update()
@@ -70,11 +71,12 @@ def open_and_close_links(links, wait_time=5):
             pyautogui.hotkey("command", "w")
         elif platform.system() == "Windows":
             pyautogui.hotkey("ctrl", "w")
+    print(f"Generated {len(links)} dataset instances")
 
 
 if __name__ == "__main__":
     os.makedirs("screenshots", exist_ok=True)
 
     # num_moves has to be an even number to prevent the bot making a move
-    links = generate_balanced_chess_com_links(n_pos=10, num_moves=64)
+    links = generate_balanced_chess_com_links(n_pos=5, num_moves=64)
     open_and_close_links(links)

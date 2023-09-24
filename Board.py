@@ -1,5 +1,8 @@
+import random
 from datetime import datetime
 
+import chess
+import chess.engine
 import cv2
 import mss
 import numpy as np
@@ -10,13 +13,27 @@ from detection import getChessboardCorners
 
 class Board:
     def __init__(self):
+        self.engine_path = "/usr/local/bin/stockfish"
         self.IMG_SIZE = 640
         self.sct = mss.mss()
         self._init_board()
+        self._init_engine()
+        self.prev_pos = None
+        self.board = None
 
     def update(self):
         self._capture_screenshot(cropped=True)
         self._resize()
+
+    def set_fen(self, fen):
+        if self.board is None:
+            self.board = chess.Board()
+            self.board.set_fen(fen)
+            try:
+                self.board.set_castling_fen("KQkq")  # Set all castling rights
+            except ValueError:
+                # Ignore the exception if castling rights can't be set
+                pass
 
     def save_screenshot(self, filename=None):
         if not filename:
@@ -25,6 +42,13 @@ class Board:
             filename = f"screenshots/screenshot{id}.png"
         cv2.imwrite(filename, self.img)
 
+    def get_best_move(self):
+        # is_game_over = selfboard.is_game_over()
+        result = self.engine.play(
+            self.board, chess.engine.Limit(time=random.randint(5, 15) / 10)
+        )
+        return str(result.move)
+
     def _init_board(self):
         while True:
             try:
@@ -32,6 +56,10 @@ class Board:
                 break
             except:
                 pass
+
+    def _init_engine(self):
+        self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
+        self.engine.configure({"Skill Level": 8})
 
     def _find_board(self):
         self._capture_screenshot()

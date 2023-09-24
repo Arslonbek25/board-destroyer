@@ -1,6 +1,6 @@
 import pyautogui as pg
 
-from analysis import get_best_move, san_to_coords
+from analysis import san_to_coords
 
 
 def play_move(move_coords, scale):
@@ -10,10 +10,8 @@ def play_move(move_coords, scale):
     pg.dragTo(x2, y2, duration=0.1, button="left")
 
 
-def play_best_move(board, engine, fen):
-    best_move = get_best_move(fen, engine)
+def play_best_move(board, best_move):
     move_coords = san_to_coords(best_move, board.sq_size_orig)
-    print(best_move)
     move_coords[:2] += board.corners[0] - board.sq_size / 2
     move_coords[2:] += board.corners[0] - board.sq_size / 2
 
