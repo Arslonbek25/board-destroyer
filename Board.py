@@ -30,9 +30,8 @@ class Board:
             self.board = chess.Board()
             self.board.set_fen(fen)
             try:
-                self.board.set_castling_fen("KQkq")  # Set all castling rights
+                self.board.set_castling_fen("KQkq")
             except ValueError:
-                # Ignore the exception if castling rights can't be set
                 pass
 
     def save_screenshot(self, filename=None):
@@ -43,9 +42,8 @@ class Board:
         cv2.imwrite(filename, self.img)
 
     def get_best_move(self):
-        # is_game_over = selfboard.is_game_over()
         result = self.engine.play(
-            self.board, chess.engine.Limit(time=random.randint(5, 15) / 10)
+            self.board, chess.engine.Limit(time=random.randint(5, 30) / 10)
         )
         return str(result.move)
 
@@ -59,7 +57,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 8})
+        self.engine.configure({"Skill Level": 3})
 
     def _find_board(self):
         self._capture_screenshot()

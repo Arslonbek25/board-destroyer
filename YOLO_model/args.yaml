@@ -1,9 +1,9 @@
 task: detect
 mode: train
 model: yolov8n.pt
-data: /content/Chess-piece-detection-6/data.yaml
+data: /content/Chess-piece-detection-8/data.yaml
 epochs: 100
-patience: 25
+patience: 50
 batch: 16
 imgsz: 640
 save: true
@@ -95,4 +95,4 @@ mixup: 0.0
 copy_paste: 0.0
 cfg: null
 tracker: botsort.yaml
-save_dir: runs/detect/train7
+save_dir: runs/detect/train
