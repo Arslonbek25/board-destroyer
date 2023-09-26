@@ -24,13 +24,15 @@ def run():
         fen = analysis.get_fen(pos, turn)
         board.set_fen(fen)
         if not np.array_equal(board.prev_pos, pos):
-            if board.prev_pos is not None and pos is not None:
+            board_changed = board.prev_pos is not None and pos is not None
+            if board_changed:
                 move_made = analysis.find_move(board.prev_pos, pos)
                 if move_made == "error": # TODO: remove
                     print(board.prev_pos)
                     print(pos) 
                 board.board.push_san(move_made)
-            if color == turn:
+            our_turn = color == turn
+            if our_turn:
                 best_move = board.get_best_move()
                 control.play_best_move(board, best_move)
             change_turn()

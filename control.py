@@ -6,8 +6,8 @@ from analysis import san_to_coords
 def play_move(move_coords, scale):
     move_coords /= scale
     x1, y1, x2, y2 = move_coords
-    pg.moveTo(x1, y1, duration=0.1)
-    pg.dragTo(x2, y2, duration=0.1, button="left")
+    pg.moveTo(x1, y1)
+    pg.dragTo(x2, y2, button="left")
 
 
 def play_best_move(board, best_move):
