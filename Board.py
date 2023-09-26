@@ -20,6 +20,8 @@ class Board:
         self._init_engine()
         self.prev_pos = None
         self.board = None
+        self.last_speed = None
+        self.max_move_time = {"rapid": 10, "blitz": 3, "bullet": 1}
 
     def update(self):
         self._capture_screenshot(cropped=True)
@@ -41,10 +43,8 @@ class Board:
             filename = f"screenshots/screenshot{id}.png"
         cv2.imwrite(filename, self.img)
 
-    def get_best_move(self):
-        result = self.engine.play(
-            self.board, chess.engine.Limit(time=random.randint(5, 30) / 10)
-        )
+    def get_best_move(self, move_time):
+        result = self.engine.play(self.board, chess.engine.Limit(time=move_time))
         return str(result.move)
 
     def _init_board(self):
@@ -57,7 +57,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 3})
+        self.engine.configure({"Skill Level": 4})
 
     def _find_board(self):
         self._capture_screenshot()

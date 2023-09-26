@@ -5,11 +5,13 @@ import analysis
 import control
 import detect
 from board import Board
+import time
 
 board = Board()
 
 turn = control.get_turn()
 color = control.get_color()
+timecontrol = control.get_timecontrol()
 
 
 def change_turn():
@@ -24,22 +26,25 @@ def run():
         fen = analysis.get_fen(pos, turn)
         board.set_fen(fen)
         if not np.array_equal(board.prev_pos, pos):
+            move_time = time.time() - board.last_speed if board.last_speed else 0.5
+            board.last_speed = time.time()
+            move_time = min(max(0.4 * move_time, 0.2), board.max_move_time[timecontrol])
             board_changed = board.prev_pos is not None and pos is not None
             if board_changed:
                 move_made = analysis.find_move(board.prev_pos, pos)
-                if move_made == "error": # TODO: remove
+                if move_made == "error":  # TODO: remove
+                    print("FEN", board.board.fen())
                     print(board.prev_pos)
-                    print(pos) 
+                    print(pos)
                 board.board.push_san(move_made)
             our_turn = color == turn
             if our_turn:
-                best_move = board.get_best_move()
+                best_move = board.get_best_move(move_time)
                 control.play_best_move(board, best_move)
+
             change_turn()
             board.prev_pos = np.copy(pos)
-        game = chess.pgn.Game.from_board(board.board)
-        print(game) # TODO: remove
-        print("FEN", board.board.fen())
+
         is_game_over = board.board.is_game_over()
         if is_game_over:
             print("Game over")

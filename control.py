@@ -30,3 +30,9 @@ def get_color():
     while turn not in ["b", "w"]:
         turn = input("\nWhat color are you playing? (b/w): ")
     return turn
+
+def get_timecontrol():
+    timecontrol = ""
+    while timecontrol not in ["rapid", "blitz", "bullet"] and timecontrol.strip() != "":
+        timecontrol = input("\nWhat timecontrol are you playing? (rapid/blitz/bullet): ")
+    return timecontrol or "blitz"
