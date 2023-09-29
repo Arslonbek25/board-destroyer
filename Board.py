@@ -21,7 +21,7 @@ class Board:
         self.prev_pos = None
         self.board = None
         self.last_speed = None
-        self.max_move_time = {"rapid": 10, "blitz": 3, "bullet": 1}
+        self.max_move_time = {"rapid": 10, "blitz": 3, "bullet": 0.2}
 
     def update(self):
         self._capture_screenshot(cropped=True)
@@ -57,7 +57,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 4})
+        self.engine.configure({"Skill Level": 12})
 
     def _find_board(self):
         self._capture_screenshot()

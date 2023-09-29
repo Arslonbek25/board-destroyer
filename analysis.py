@@ -1,7 +1,10 @@
 import numpy as np
 
 
-def get_fen(coords, turn):
+def get_fen(coords, turn, color):
+    if color == "b":
+        coords = np.flip(coords, axis=(0, 1))
+
     fen = ""
     for row in coords:
         empty_sqs = 0
@@ -11,21 +14,25 @@ def get_fen(coords, turn):
             if (square != "" or square_i == 7) and empty_sqs:
                 fen += str(empty_sqs)
                 empty_sqs = 0
-            fen += square
+            fen += str(square)
         fen += "/"
+
     return "{} {}".format(fen.rstrip("/"), turn)
 
 
-def san_to_coords(san, sq_size):
+def san_to_coords(san, sq_size, color):
     ranks = "abcdefgh"
     files = "12345678"
+
+    if color == "b":
+        ranks = ranks[::-1]
+        files = files[::-1]
 
     x1 = ranks.index(san[0])
     y1 = 7 - files.index(san[1])
     x2 = ranks.index(san[2])
     y2 = 7 - files.index(san[3])
     coords = (np.array([x1, y1, x2, y2], dtype=float) + 1) * sq_size
-
     return coords
 
 
@@ -33,7 +40,10 @@ def to_uci(x, y):
     return chr(97 + y) + str(8 - x)
 
 
-def find_move(before, after):
+def find_move(before, after, color):
+    if color == "b":
+        before = np.flip(before, axis=(0, 1))
+        after = np.flip(after, axis=(0, 1))
     indices_to_files = "abcdefgh"
     diff = before != after
     changed_indices = np.argwhere(diff)
@@ -91,32 +101,31 @@ if __name__ == "__main__":
     # Tests
     prev = np.array(
         [
-            ["r", "n", "b", "q", "k", "b", "n", "r"],
-            ["p", "p", "p", "p", "p", "p", "p", "p"],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", ""],
+            ["R", "N", "B", "Q", "K", "B", "", "R"],
             ["P", "P", "P", "P", "P", "P", "P", "P"],
-            ["R", "N", "B", "Q", "K", "B", "N", "R"],
+            ["", "", "", "", "", "N", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "p", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""],
+            ["p", "p", "p", "", "p", "p", "p", "p"],
+            ["r", "n", "b", "q", "k", "b", "n", "r"],
         ],
         dtype=np.dtype("U1"),
     )
 
-    after = np.array(
-        [
-            ["r", "n", "b", "q", "k", "b", "n", "r"],
-            ["p", "p", "p", "p", "p", "p", "p", ""],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", "p"],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", ""],
-            ["P", "P", "P", "P", "P", "P", "P", "P"],
-            ["R", "N", "B", "Q", "K", "B", "N", "R"],
-        ],
-        dtype=np.dtype("U1"),
-    )
-    print(find_move(prev, after))  # e4e5
+    # after = np.array(
+    #     [
+    #         ["r", "n", "b", "q", "k", "b", "n", "r"],
+    #         ["p", "p", "p", "p", "p", "p", "p", ""],
+    #         ["", "", "", "", "", "", "", ""],
+    #         ["", "", "", "", "", "", "", "p"],
+    #         ["", "", "", "", "", "", "", ""],
+    #         ["", "", "", "", "", "", "", ""],
+    #         ["P", "P", "P", "P", "P", "P", "P", "P"],
+    #         ["R", "N", "B", "Q", "K", "B", "N", "R"],
+    #     ],
+    #     dtype=np.dtype("U1"),
+    # )
 
 #     prev = np.array([
 #     ["r", "n", "b", "q", "k", "b", "n", "r"],

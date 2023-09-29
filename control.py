@@ -10,8 +10,8 @@ def play_move(move_coords, scale):
     pg.dragTo(x2, y2, button="left")
 
 
-def play_best_move(board, best_move):
-    move_coords = san_to_coords(best_move, board.sq_size_orig)
+def play_best_move(board, best_move, color):
+    move_coords = san_to_coords(best_move, board.sq_size_orig, color)
     move_coords[:2] += board.corners[0] - board.sq_size / 2
     move_coords[2:] += board.corners[0] - board.sq_size / 2
 
@@ -31,8 +31,13 @@ def get_color():
         turn = input("\nWhat color are you playing? (b/w): ")
     return turn
 
+
 def get_timecontrol():
-    timecontrol = ""
-    while timecontrol not in ["rapid", "blitz", "bullet"] and timecontrol.strip() != "":
-        timecontrol = input("\nWhat timecontrol are you playing? (rapid/blitz/bullet): ")
-    return timecontrol or "blitz"
+    tc_map = {"1": "bullet", "2": "blitz", "3": "rapid"}
+    options = ", ".join(tc_map.values())
+    while True:
+        inp = input(f"\nEnter time control [{options}]: ").strip().lower()
+        if inp in tc_map.values():
+            return inp
+        if inp in tc_map:
+            return tc_map[inp]
