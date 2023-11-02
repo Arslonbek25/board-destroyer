@@ -1,4 +1,3 @@
-import random
 from datetime import datetime
 
 import chess
@@ -7,6 +6,9 @@ import cv2
 import mss
 import numpy as np
 import pyautogui as pg
+import time
+import random
+import control
 
 from detection import getChessboardCorners
 
@@ -18,10 +20,13 @@ class Board:
         self.sct = mss.mss()
         self._init_board()
         self._init_engine()
+        self.turn = control.get_turn()
+        self.color = control.get_color()
+        self.timecontrol = control.get_timecontrol()
         self.prev_pos = None
         self.board = None
         self.last_speed = None
-        self.max_move_time = {"rapid": 10, "blitz": 3, "bullet": 0.2}
+        self.max_move_time = {"rapid": 10, "blitz": 3, "bullet": 0.1}
 
     def update(self):
         self._capture_screenshot(cropped=True)
@@ -43,8 +48,19 @@ class Board:
             filename = f"screenshots/screenshot{id}.png"
         cv2.imwrite(filename, self.img)
 
-    def get_best_move(self, move_time):
-        result = self.engine.play(self.board, chess.engine.Limit(time=move_time))
+    def get_move_time(self):
+        move_time = time.time() - self.last_speed if self.last_speed else 0.5
+        self.last_speed = time.time()
+        move_time = min(
+            max(random.randint(35, 60) / 100 * move_time, 0.2),
+            self.max_move_time[self.timecontrol],
+        )
+        return move_time
+
+    def get_best_move(self):
+        result = self.engine.play(
+            self.board, chess.engine.Limit(time=self.get_move_time())
+        )
         return str(result.move)
 
     def _init_board(self):
@@ -57,7 +73,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 12})
+        self.engine.configure({"Skill Level": 20})
 
     def _find_board(self):
         self._capture_screenshot()

@@ -1,10 +1,7 @@
 import numpy as np
 
 
-def get_fen(coords, turn, color):
-    if color == "b":
-        coords = np.flip(coords, axis=(0, 1))
-
+def get_fen(coords, turn):
     fen = ""
     for row in coords:
         empty_sqs = 0
@@ -41,9 +38,6 @@ def to_uci(x, y):
 
 
 def find_move(before, after, color):
-    if color == "b":
-        before = np.flip(before, axis=(0, 1))
-        after = np.flip(after, axis=(0, 1))
     indices_to_files = "abcdefgh"
     diff = before != after
     changed_indices = np.argwhere(diff)
