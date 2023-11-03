@@ -17,27 +17,8 @@ def get_fen(coords, turn):
     return "{} {}".format(fen.rstrip("/"), turn)
 
 
-def san_to_coords(san, sq_size, color):
-    ranks = "abcdefgh"
-    files = "12345678"
-
-    if color == "b":
-        ranks = ranks[::-1]
-        files = files[::-1]
-
-    x1 = ranks.index(san[0])
-    y1 = 7 - files.index(san[1])
-    x2 = ranks.index(san[2])
-    y2 = 7 - files.index(san[3])
-    coords = (np.array([x1, y1, x2, y2], dtype=float) + 1) * sq_size
-    return coords
-
-
-def to_uci(x, y):
-    return chr(97 + y) + str(8 - x)
-
-
-def find_move(before, after, color):
+def find_move(board):
+    before, after = board.prev_pos, board.pos
     indices_to_files = "abcdefgh"
     diff = before != after
     changed_indices = np.argwhere(diff)

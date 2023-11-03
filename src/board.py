@@ -1,3 +1,5 @@
+import random
+import time
 from datetime import datetime
 
 import chess
@@ -6,11 +8,9 @@ import cv2
 import mss
 import numpy as np
 import pyautogui as pg
-import time
-import random
-import control
 
-from detection import getChessboardCorners
+import control
+from detect import getBoardCorners
 
 
 class Board:
@@ -63,6 +63,19 @@ class Board:
         )
         return str(result.move)
 
+    def switch_turn(self):
+        self.turn = "b" if self.turn == "w" else "w"
+        self.prev_pos = np.copy(self.pos)
+
+    def game_over(self):
+        return self.board.is_game_over() if self.board else False
+
+    def pos_changed(self):
+        return not np.array_equal(self.prev_pos, self.pos)
+
+    def is_our_turn(self):
+        return self.color == self.turn
+
     def _init_board(self):
         while True:
             try:
@@ -97,7 +110,7 @@ class Board:
         self.img = np.array(self.sct.grab(monitor))
 
     def _find_corners(self):
-        self.corners = getChessboardCorners(self.img)
+        self.corners = getBoardCorners(self.img)
 
     def _get_sq_size(self):
         return sum(self.img.shape[:2]) / 16

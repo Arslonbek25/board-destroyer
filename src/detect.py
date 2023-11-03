@@ -1,5 +1,43 @@
+import os
+
 import cv2
 import numpy as np
+from ultralytics import YOLO
+
+model_path = os.path.join(os.getcwd(), "YOLO_model", "weights", "best.pt")
+model = YOLO(model_path)
+
+piece_names = {
+    "white-king": "K",
+    "white-queen": "Q",
+    "white-rook": "R",
+    "white-bishop": "B",
+    "white-knight": "N",
+    "white-pawn": "P",
+    "black-king": "k",
+    "black-queen": "q",
+    "black-rook": "r",
+    "black-bishop": "b",
+    "black-knight": "n",
+    "black-pawn": "p",
+}
+
+
+def find_pieces(board):
+    img = board.img[:, :, :3]
+    pos = np.zeros((8, 8), dtype=np.dtype("U1"))
+    res = model.predict(img, verbose=False)[0]
+    coords = res.boxes.xyxy.numpy().astype(int)[:, 0:2]
+    labels = [model.names[int(c)] for c in res.boxes.cls]
+    board_height, board_width, _ = img.shape
+    for i in range(len(coords)):
+        x, y = coords[i]
+        posX = round(8 * x / board_width)
+        posY = round(8 * y / board_height)
+        pos[posY, posX] = piece_names[labels[i]]
+    if board.color == "b":
+        pos = np.flip(pos, axis=(0, 1))
+    return pos
 
 
 def is_square(A, threshold=10):
@@ -13,7 +51,7 @@ def is_square(A, threshold=10):
     return True
 
 
-def getChessboardCorners(board):
+def getBoardCorners(board):
     board_gray = cv2.cvtColor(board, cv2.COLOR_BGR2GRAY)
     _, thresholded = cv2.threshold(board_gray, 120, 255, cv2.THRESH_BINARY)
     contours, _ = cv2.findContours(
