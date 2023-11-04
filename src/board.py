@@ -1,4 +1,3 @@
-import random
 import time
 from datetime import datetime
 
@@ -10,6 +9,7 @@ import numpy as np
 import pyautogui as pg
 
 import control
+from clock import Clock
 from detect import getBoardCorners
 
 
@@ -26,7 +26,9 @@ class Board:
         self.prev_pos = None
         self.board = None
         self.last_speed = None
-        self.max_move_time = {"rapid": 10, "blitz": 3, "bullet": 0.1}
+        self.is_capture = False
+        self.max_move_time = {"rapid": 10, "blitz": 6, "bullet": 0.1}
+        self.clock = Clock(self.max_move_time[self.timecontrol], k=0.7)
 
     def update(self):
         self._capture_screenshot(cropped=True)
@@ -49,13 +51,15 @@ class Board:
         cv2.imwrite(filename, self.img)
 
     def get_move_time(self):
-        move_time = time.time() - self.last_speed if self.last_speed else 0.5
+        if self.is_capture:
+            return self.clock.min_time
+
+        move_time = time.time() - self.last_speed if self.last_speed else 0.1
         self.last_speed = time.time()
-        move_time = min(
-            max(random.randint(35, 60) / 100 * move_time, 0.2),
-            self.max_move_time[self.timecontrol],
-        )
-        return move_time
+        num_pieces = len(self.board.piece_map())
+        newtime = self.clock.calculate_move_time(move_time, num_pieces)
+
+        return newtime
 
     def get_best_move(self):
         result = self.engine.play(
@@ -76,6 +80,12 @@ class Board:
     def is_our_turn(self):
         return self.color == self.turn
 
+    def push_move(self, move):
+        uci = chess.Move.from_uci(move)
+        self.is_capture = self.board.is_capture(uci)
+        print(move, self.is_capture)
+        self.board.push_san(move)
+
     def _init_board(self):
         while True:
             try:
@@ -86,7 +96,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 20})
+        self.engine.configure({"Skill Level": 2})
 
     def _find_board(self):
         self._capture_screenshot()

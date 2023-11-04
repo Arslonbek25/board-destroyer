@@ -1,5 +1,3 @@
-import numpy as np
-
 import analysis
 import control
 import detect
@@ -20,9 +18,9 @@ def run():
                 move_made = analysis.find_move(board)
                 if move_made == "error":  # TODO: remove
                     print("FEN", board.board.fen(), "\n")
-                    print(board.prev_pos, "\n")
-                    print(board.pos, "\n")
-                board.board.push_san(move_made)
+                    # print(board.prev_pos, "\n")
+                    # print(board.pos, "\n")
+                board.push_move(move_made)
             if board.is_our_turn():
                 best_move = board.get_best_move()
                 control.play_move(board, best_move)
