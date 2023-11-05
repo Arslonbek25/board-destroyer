@@ -27,8 +27,8 @@ class Board:
         self.board = None
         self.last_speed = None
         self.is_capture = False
-        self.max_move_time = {"rapid": 10, "blitz": 6, "bullet": 0.1}
-        self.clock = Clock(self.max_move_time[self.timecontrol], k=0.7)
+        self.max_move_time = {"rapid": 10, "blitz": 5, "bullet": 1}
+        self.clock = Clock(self.max_move_time[self.timecontrol])
 
     def update(self):
         self._capture_screenshot(cropped=True)
@@ -83,7 +83,6 @@ class Board:
     def push_move(self, move):
         uci = chess.Move.from_uci(move)
         self.is_capture = self.board.is_capture(uci)
-        print(move, self.is_capture)
         self.board.push_san(move)
 
     def _init_board(self):
@@ -96,7 +95,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 2})
+        self.engine.configure({"Skill Level": 5})
 
     def _find_board(self):
         self._capture_screenshot()
