@@ -1,4 +1,5 @@
 import numpy as np
+import chess
 
 
 def get_fen(coords, turn):
@@ -70,6 +71,20 @@ def find_move(board):
             return move
 
     return "error"
+
+
+def get_board_position(board):
+    position = []
+    for rank in range(8, 0, -1):
+        row = []
+        for file in range(1, 9):
+            piece = board.piece_at(chess.square(file - 1, rank - 1))
+            if piece:
+                row.append(piece.symbol())
+            else:
+                row.append("")
+        position.append(row)
+    return position
 
 
 if __name__ == "__main__":

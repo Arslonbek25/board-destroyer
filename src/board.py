@@ -95,7 +95,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 5})
+        self.engine.configure({"Skill Level": 20})
 
     def _find_board(self):
         self._capture_screenshot()

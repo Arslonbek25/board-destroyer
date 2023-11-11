@@ -32,14 +32,14 @@ def play_move(board, move):
 def get_turn():
     turn = ""
     while turn not in ["b", "w"]:
-        turn = input("Whose turn is it? (b/w): ")
+        turn = input("Whose turn is it? (b/w): \n")
     return turn
 
 
 def get_color():
     turn = ""
     while turn not in ["b", "w"]:
-        turn = input("\nWhat color are you playing? (b/w): ")
+        turn = input("What color are you playing? (b/w): \n")
     return turn
 
 
@@ -47,7 +47,7 @@ def get_timecontrol():
     tc_map = {"1": "bullet", "2": "blitz", "3": "rapid"}
     options = ", ".join(tc_map.values())
     while True:
-        inp = input(f"\nEnter time control [{options}]: ").strip().lower()
+        inp = input(f"Enter time control [{options}]: \n").strip().lower()
         if inp in tc_map.values():
             return inp
         if inp in tc_map:

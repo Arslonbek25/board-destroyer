@@ -13,19 +13,18 @@ def run():
         if first_move:
             fen = analysis.get_fen(board.pos, board.turn)
             board.set_fen(fen)
-        if board.pos_changed():
+        if not board.is_our_turn() and board.pos_changed():
             if not first_move:
                 move_made = analysis.find_move(board)
-                if move_made == "error":  # TODO: remove
-                    print("FEN", board.board.fen(), "\n")
-                    # print(board.prev_pos, "\n")
-                    # print(board.pos, "\n")
                 board.push_move(move_made)
-            if board.is_our_turn():
-                best_move = board.get_best_move()
-                control.play_move(board, best_move)
             board.switch_turn()
-    print("\nGame over")
+        if board.is_our_turn():
+            best_move = board.get_best_move()
+            board.push_move(best_move)
+            control.play_move(board, best_move)
+            board.pos = analysis.get_board_position(board.board)
+            board.switch_turn()
+    print("Game over\n")
 
 
 if __name__ == "__main__":

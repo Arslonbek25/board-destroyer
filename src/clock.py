@@ -5,7 +5,7 @@ import numpy as np
 
 class Clock:
     def __init__(
-        self, max_time, time_advantage_percent=25, k=0.3, randomness_factor=0.1
+        self, max_time, time_advantage_percent=25, k=0.2, randomness_factor=0.2
     ):
         self.max_time = max_time
         self.bot_total_time = 0
@@ -13,7 +13,7 @@ class Clock:
         self.time_advantage_percent = time_advantage_percent
         self.k = k
         self.randomness_factor = randomness_factor
-        self.min_time = 0.1
+        self.min_time = 0.3
         self.phase_peak_times = {
             "opening": max_time * 0.3,
             "middlegame": max_time * 1,
