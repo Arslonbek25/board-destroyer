@@ -16,7 +16,7 @@ from detect import getBoardCorners
 class Board:
     def __init__(self):
         self.engine_path = "/usr/local/bin/stockfish"
-        self.IMG_SIZE = 640
+        self.IMG_SIZE = 750
         self.sct = mss.mss()
         self._init_board()
         self._init_engine()
@@ -27,7 +27,7 @@ class Board:
         self.board = None
         self.last_speed = None
         self.is_capture = False
-        self.max_move_time = {"rapid": 10, "blitz": 5, "bullet": 1}
+        self.max_move_time = {"rapid": 10, "blitz": 6, "bullet": 1}
         self.clock = Clock(self.max_move_time[self.timecontrol])
 
     def update(self):
@@ -67,8 +67,9 @@ class Board:
         )
         return str(result.move)
 
-    def switch_turn(self):
-        self.turn = "b" if self.turn == "w" else "w"
+    def switch_turn(self, is_first_move=False):
+        if not is_first_move:
+            self.turn = "b" if self.turn == "w" else "w"
         self.prev_pos = np.copy(self.pos)
 
     def game_over(self):

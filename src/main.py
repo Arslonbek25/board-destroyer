@@ -18,7 +18,7 @@ def run():
                 if not is_first_move:
                     move_made = analysis.find_move(board)
                     board.push_move(move_made)
-                board.switch_turn()
+                board.switch_turn(is_first_move)
             if board.is_our_turn():
                 best_move = board.get_best_move()
                 board.push_move(best_move)
