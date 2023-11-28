@@ -1,21 +1,25 @@
-import numpy as np
 import chess
+import numpy as np
 
 
 def get_fen(coords, turn):
-    fen = ""
-    for row in coords:
-        empty_sqs = 0
-        for square_i, square in enumerate(row):
-            if square == "":
-                empty_sqs += 1
-            if (square != "" or square_i == 7) and empty_sqs:
-                fen += str(empty_sqs)
-                empty_sqs = 0
-            fen += str(square)
-        fen += "/"
+    fen = []
+    for rank in coords:
+        row = []
+        empty = 0
+        for square in rank:
+            if square:
+                if empty:
+                    row.append(str(empty))
+                    empty = 0
+                row.append(square)
+            else:
+                empty += 1
+        if empty:
+            row.append(str(empty))
+        fen.append("".join(row))
 
-    return "{} {}".format(fen.rstrip("/"), turn)
+    return "/".join(fen) + f" {turn}"
 
 
 def find_move(board):
