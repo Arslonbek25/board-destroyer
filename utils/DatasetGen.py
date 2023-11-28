@@ -8,6 +8,11 @@ import webbrowser
 import chess
 import pyautogui
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
+
 from board import Board
 
 
@@ -63,7 +68,7 @@ def open_and_close_links(links, wait_time=5):
 
         if board is None:
             time.sleep(2)
-            board = Board()
+            board = Board(util=True)
 
         board.update()
         board.save_screenshot()

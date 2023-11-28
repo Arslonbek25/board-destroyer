@@ -9,16 +9,16 @@ def run():
     while not board.game_over():
         board.update()
         board.pos = detect.find_pieces(board)
-        is_first_move = board.prev_pos is None
-        if is_first_move:
+        is_first_run = board.prev_pos is None
+        if is_first_run:
             fen = analysis.get_fen(board.pos, board.turn)
             board.set_fen(fen)
         if board.pos_changed():
             if not board.is_our_turn():
-                if not is_first_move:
+                if not is_first_run:
                     move_made = analysis.find_move(board)
                     board.push_move(move_made)
-                board.switch_turn(is_first_move)
+                board.switch_turn(is_first_run)
             if board.is_our_turn():
                 best_move = board.get_best_move()
                 board.push_move(best_move)
