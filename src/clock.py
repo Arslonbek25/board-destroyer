@@ -2,61 +2,53 @@ import random
 
 import numpy as np
 
+from config import Config
+
 
 class Clock:
-    def __init__(
-        self, max_time, time_advantage_percent=25, k=0.2, randomness_factor=0.2
-    ):
-        self.max_time = max_time
+    def __init__(self, timecontrol, k=0.2):
+        self.tc = getattr(Config, timecontrol)
+        self.time_advantage_percent = Config.time_advantage_percent
+        self.k = k
+        self.randomness_factor = Config.randomness_factor
         self.bot_total_time = 0
         self.opponent_total_time = 0
-        self.time_advantage_percent = time_advantage_percent
-        self.k = k
-        self.randomness_factor = randomness_factor
-        self.min_time = 0.3
-        self.phase_peak_times = {
-            "opening": max_time * 0.3,
-            "middlegame": max_time * 1,
-            "endgame": max_time * 0.8,
-        }
 
     def calculate_move_time(self, opponents_move_time, num_pieces):
-        # Scale the peak time based on the game phase
-        max_time = self.phase_peak_times.get(self.get_phase(num_pieces), self.max_time)
-
         # Update the opponent's total time
         self.opponent_total_time += opponents_move_time
 
-        # Maintain the average time advantage
+        # Determine the game phase and adjust max_time
+        phase = self.get_phase(num_pieces)
+        max_time = self.tc.max_time * Config.phase_factors[phase]
+
+        # Calculate base move time
+        base_move_time = self.calculate_base_time(opponents_move_time, max_time)
+
+        # Calculate the desired bot total time to maintain the time advantage
         desired_bot_total_time = (
             1 - self.time_advantage_percent / 100
         ) * self.opponent_total_time
 
-        # Calculate the maximum allowed time for the next move
-        max_allowed_time = desired_bot_total_time - self.bot_total_time
-
-        # Symmetrical exponential decay function to determine the base move time
-        base_move_time = self.min_time
-        if opponents_move_time <= max_time:
-            base_move_time += (max_time - self.min_time) * np.exp(
-                self.k * (opponents_move_time - max_time)
-            )
+        # Check if the bot needs to catch up or maintain the advantage
+        if self.bot_total_time > desired_bot_total_time:
+            # Bot needs to catch up
+            adjustment_factor = 0.5  # Adjust this factor for smoothness
+            time_difference = desired_bot_total_time - self.bot_total_time
+            move_time = base_move_time + adjustment_factor * time_difference
         else:
-            base_move_time += (max_time - self.min_time) * np.exp(
-                self.k * (max_time - opponents_move_time)
-            )
+            # Bot has the advantage or is on par, continue with normal play
+            move_time = base_move_time
 
-        # Adjust the move time to be within the allowed maximum time while respecting the minimum time
-        move_time = min(base_move_time, max_allowed_time)
-        move_time = max(move_time, self.min_time)
+        # Ensure move time is within acceptable range
+        move_time = min(max(move_time, self.tc.min_time), max_time)
 
-        # Add randomness to the move time to avoid predictability
+        # Add randomness to avoid predictability
         move_time *= random.uniform(
             1 - self.randomness_factor, 1 + self.randomness_factor
         )
 
         self.bot_total_time += move_time
-
         return move_time
 
     def get_phase(self, num_pieces):
@@ -66,3 +58,29 @@ class Clock:
             return "middlegame"
         else:
             return "endgame"
+
+    def calculate_base_time(self, opponents_move_time, max_time):
+        if opponents_move_time <= max_time:
+            return self.tc.min_time + (max_time - self.tc.min_time) * np.exp(
+                self.k * (opponents_move_time - max_time)
+            )
+        else:
+            return self.tc.min_time + (max_time - self.tc.min_time) * np.exp(
+                self.k * (max_time - opponents_move_time)
+            )
+
+
+if __name__ == "__main__":
+    c = Clock("bullet")
+    for i in range(50):
+        opp = random.uniform(0.1, 2)
+        bot = c.calculate_move_time(opp, 20)
+        print(
+            "Opponent",
+            round(opp, 2),
+            "Bot",
+            round(bot, 2),
+        )
+    s = c.opponent_total_time / c.bot_total_time
+    print(round(s, 2), "second advantage")
+    print("Time advantage %", round((s - 1) * 100, 2))

@@ -18,14 +18,13 @@ class Board:
         self.engine_path = "/usr/local/bin/stockfish"
         self.IMG_SIZE = 750
         self.sct = mss.mss()
-        self._init_board()
-        self._init_engine()
-        self.max_move_time = {"rapid": 10, "blitz": 6, "bullet": 1}
         if not util:
             self.turn = control.get_turn()
             self.color = control.get_color()
             self.timecontrol = control.get_timecontrol()
-            self.clock = Clock(self.max_move_time[self.timecontrol])
+            self.clock = Clock(self.timecontrol)
+            self._init_engine()
+        self._init_board()
         self.prev_pos = None
         self.board = None
         self.last_speed = None
@@ -53,7 +52,7 @@ class Board:
 
     def get_move_time(self):
         if self.obvious_move:
-            return self.clock.min_time
+            return self.clock.tc.min_time
 
         move_time = time.time() - self.last_speed if self.last_speed else 0.1
         self.last_speed = time.time()
@@ -83,26 +82,24 @@ class Board:
         return self.color == self.turn
 
     def push_move(self, move):
-        if not self.is_our_turn():
-            self.obvious_move = self.check_obvious_move(move)
-        self.board.push_san(move)
-
-    def check_obvious_move(self, move):
         uci = chess.Move.from_uci(move)
         is_capture = self.board.is_capture(uci)
-        is_check = self.board.is_check()
 
-        if is_capture or is_check:
-            return True
+        self.board.push_san(move)
 
-        if self.board.piece_at(uci.from_square).piece_type == chess.PAWN:
-            return any(
-                self.board.piece_at(sq)
-                and self.board.piece_at(sq).color != self.board.turn
-                for sq in self.board.attacks(uci.from_square)
-            )
+        if not self.is_our_turn():
+            is_check = self.board.is_check()
+            self.obvious_move = is_capture or is_check
 
-        return False
+            if self.board.piece_at(uci.to_square).piece_type == chess.PAWN:
+                is_threat = any(
+                    self.board.piece_at(sq)
+                    and self.board.piece_at(sq).color == self.board.turn
+                    for sq in self.board.attacks(uci.to_square)
+                )
+                self.obvious_move |= is_threat
+                if is_threat:
+                    print("Threat: ", move)
 
     def _init_board(self):
         while True:
@@ -114,7 +111,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 15})
+        self.engine.configure({"Skill Level": self.clock.tc.skill_level})
 
     def _find_board(self):
         self._capture_screenshot()
