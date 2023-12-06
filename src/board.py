@@ -29,7 +29,7 @@ class Board:
         self.prev_pos = None
         self.board = None
         self.last_speed = None
-        self.is_capture = False
+        self.obvious_move = False
 
     def update(self):
         self._capture_screenshot(cropped=True)
@@ -52,7 +52,7 @@ class Board:
         cv2.imwrite(filename, self.img)
 
     def get_move_time(self):
-        if self.is_capture:
+        if self.obvious_move:
             return self.clock.min_time
 
         move_time = time.time() - self.last_speed if self.last_speed else 0.1
@@ -83,9 +83,26 @@ class Board:
         return self.color == self.turn
 
     def push_move(self, move):
-        uci = chess.Move.from_uci(move)
-        self.is_capture = self.board.is_capture(uci)
+        if not self.is_our_turn():
+            self.obvious_move = self.check_obvious_move(move)
         self.board.push_san(move)
+
+    def check_obvious_move(self, move):
+        uci = chess.Move.from_uci(move)
+        is_capture = self.board.is_capture(uci)
+        is_check = self.board.is_check()
+
+        if is_capture or is_check:
+            return True
+
+        if self.board.piece_at(uci.from_square).piece_type == chess.PAWN:
+            return any(
+                self.board.piece_at(sq)
+                and self.board.piece_at(sq).color != self.board.turn
+                for sq in self.board.attacks(uci.from_square)
+            )
+
+        return False
 
     def _init_board(self):
         while True:
@@ -97,7 +114,7 @@ class Board:
 
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
-        self.engine.configure({"Skill Level": 20})
+        self.engine.configure({"Skill Level": 15})
 
     def _find_board(self):
         self._capture_screenshot()
