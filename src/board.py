@@ -31,9 +31,9 @@ class Board:
         self.obvious_move = False
 
     def update(self):
+        self.last_update = time.time()
         self._capture_screenshot(cropped=True)
         self._resize()
-        self.last_update = time.time()
 
     def set_fen(self, fen):
         if self.board is None:
@@ -62,6 +62,8 @@ class Board:
 
     def track_opp_move_time(self):
         self.opp_move_time = self.last_update - self.opp_move_start_time
+
+        print(self.opp_move_time)
 
     def start_opp_move_time(self):
         self.opp_move_start_time = time.time()
