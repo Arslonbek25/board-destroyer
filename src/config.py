@@ -7,13 +7,14 @@ class TimeControl:
 
 
 class Config:
-    rapid = TimeControl(0.5, 15, 3)
-    blitz = TimeControl(0.3, 7, 3)
-    bullet = TimeControl(0.1, 0.7, 3)
+    rapid = TimeControl(0.3, 15, 3)
+    blitz = TimeControl(0.1, 6, 4)
+    bullet = TimeControl(0.1, 0.6, 4)
+    puzzle = TimeControl(0.1, 0.1, 20)
 
-    time_advantage_percent = 10
+    time_advantage_percent = 20
     randomness_factor = 0.15
-    k = 0.3
+    k = 0.2
     phase_factors = {
         "opening": 0.3,
         "middlegame": 1,

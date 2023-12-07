@@ -44,7 +44,7 @@ def get_color():
 
 
 def get_timecontrol():
-    tc_map = {"1": "bullet", "2": "blitz", "3": "rapid"}
+    tc_map = {"1": "bullet", "2": "blitz", "3": "rapid", "4": "puzzle"}
     options = ", ".join(tc_map.values())
     while True:
         inp = input(f"Enter time control [{options}]: \n").strip().lower()

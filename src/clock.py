@@ -33,7 +33,7 @@ class Clock:
         # Check if the bot needs to catch up or maintain the advantage
         if self.bot_total_time > desired_bot_total_time:
             # Bot needs to catch up
-            adjustment_factor = 0.3  # Adjust this factor for smoothness
+            adjustment_factor = 0.5  # Adjust this factor for smoothness
             time_difference = desired_bot_total_time - self.bot_total_time
             move_time = base_move_time + adjustment_factor * time_difference
         else:
@@ -41,6 +41,7 @@ class Clock:
             move_time = base_move_time
 
         # Ensure move time is within acceptable range
+        move_time = min(move_time, opponents_move_time)
         move_time = min(max(move_time, self.tc.min_time), max_time)
 
         # Add randomness to avoid predictability
@@ -71,9 +72,9 @@ class Clock:
 
 
 if __name__ == "__main__":
-    c = Clock("bullet")
-    for i in range(50):
-        opp = random.uniform(0.1, 1)
+    c = Clock("puzzle")
+    for i in range(4):
+        opp = random.uniform(0.1, 0.1)
         bot = c.calculate_move_time(opp, 20)
         print(
             f"Opponent {round(opp, 2)}s",

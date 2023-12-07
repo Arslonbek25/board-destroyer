@@ -15,6 +15,7 @@ def run():
             board.set_fen(fen)
         if board.pos_changed():
             if not board.is_our_turn():
+                board.track_opp_move_time()
                 if not is_first_run:
                     move_made = analysis.find_move(board)
                     board.push_move(move_made)
@@ -23,6 +24,7 @@ def run():
                 best_move = board.get_best_move()
                 board.push_move(best_move)
                 control.play_move(board, best_move)
+                board.start_opp_move_time()
                 board.pos = analysis.get_board_position(board.board)
                 board.switch_turn()
     print("Game over\n")

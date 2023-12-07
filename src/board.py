@@ -15,8 +15,7 @@ from detect import getBoardCorners
 
 class Board:
     def __init__(self, util=False):
-        self.engine_path = "/usr/local/bin/stockfish"
-        self.IMG_SIZE = 750
+        self.IMG_SIZE = 640
         self.sct = mss.mss()
         if not util:
             self.turn = control.get_turn()
@@ -27,12 +26,14 @@ class Board:
         self._init_board()
         self.prev_pos = None
         self.board = None
-        self.last_speed = None
+        self.opp_move_start_time = None
+        self.opp_move_time = self.clock.tc.min_time
         self.obvious_move = False
 
     def update(self):
         self._capture_screenshot(cropped=True)
         self._resize()
+        self.last_update = time.time()
 
     def set_fen(self, fen):
         if self.board is None:
@@ -54,12 +55,16 @@ class Board:
         if self.obvious_move:
             return self.clock.tc.min_time
 
-        move_time = time.time() - self.last_speed if self.last_speed else 0.1
-        self.last_speed = time.time()
         num_pieces = len(self.board.piece_map())
-        newtime = self.clock.calculate_move_time(move_time, num_pieces)
+        newtime = self.clock.calculate_move_time(self.opp_move_time, num_pieces)
 
         return newtime
+
+    def track_opp_move_time(self):
+        self.opp_move_time = self.last_update - self.opp_move_start_time
+
+    def start_opp_move_time(self):
+        self.opp_move_start_time = time.time()
 
     def get_best_move(self):
         result = self.engine.play(
@@ -108,7 +113,7 @@ class Board:
                 pass
 
     def _init_engine(self):
-        self.engine = chess.engine.SimpleEngine.popen_uci(self.engine_path)
+        self.engine = chess.engine.SimpleEngine.popen_uci("stockfish")
         self.engine.configure({"Skill Level": self.clock.tc.skill_level})
 
     def _find_board(self):
