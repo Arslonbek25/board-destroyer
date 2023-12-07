@@ -6,10 +6,10 @@ from config import Config
 
 
 class Clock:
-    def __init__(self, timecontrol, k=0.2):
+    def __init__(self, timecontrol):
         self.tc = getattr(Config, timecontrol)
         self.time_advantage_percent = Config.time_advantage_percent
-        self.k = k
+        self.k = Config.k
         self.randomness_factor = Config.randomness_factor
         self.bot_total_time = 0
         self.opponent_total_time = 0
@@ -33,7 +33,7 @@ class Clock:
         # Check if the bot needs to catch up or maintain the advantage
         if self.bot_total_time > desired_bot_total_time:
             # Bot needs to catch up
-            adjustment_factor = 0.5  # Adjust this factor for smoothness
+            adjustment_factor = 0.3  # Adjust this factor for smoothness
             time_difference = desired_bot_total_time - self.bot_total_time
             move_time = base_move_time + adjustment_factor * time_difference
         else:
@@ -73,14 +73,12 @@ class Clock:
 if __name__ == "__main__":
     c = Clock("bullet")
     for i in range(50):
-        opp = random.uniform(0.1, 2)
+        opp = random.uniform(0.1, 1)
         bot = c.calculate_move_time(opp, 20)
         print(
-            "Opponent",
-            round(opp, 2),
-            "Bot",
-            round(bot, 2),
+            f"Opponent {round(opp, 2)}s",
+            f"Bot {round(bot, 2)}s",
         )
     s = c.opponent_total_time / c.bot_total_time
     print(round(s, 2), "second advantage")
-    print("Time advantage %", round((s - 1) * 100, 2))
+    print(f"Time advantage {round((s - 1) * 100, 2)}%")

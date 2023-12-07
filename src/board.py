@@ -98,8 +98,6 @@ class Board:
                     for sq in self.board.attacks(uci.to_square)
                 )
                 self.obvious_move |= is_threat
-                if is_threat:
-                    print("Threat: ", move)
 
     def _init_board(self):
         while True:
