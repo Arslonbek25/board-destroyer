@@ -26,7 +26,7 @@ class Board:
         self._init_board()
         self.prev_pos = None
         self.board = None
-        self.opp_move_start_time = None
+        self.opp_move_start_time = time.time()
         self.opp_move_time = self.clock.tc.min_time
         self.obvious_move = False
 
@@ -62,8 +62,6 @@ class Board:
 
     def track_opp_move_time(self):
         self.opp_move_time = self.last_update - self.opp_move_start_time
-
-        print(self.opp_move_time)
 
     def start_opp_move_time(self):
         self.opp_move_start_time = time.time()
