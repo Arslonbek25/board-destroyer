@@ -18,8 +18,9 @@ def move_to_pixels(move, board):
     return coords
 
 
-def play_move(board, move):
+def play_move(board, move: str):
     move_coords = move_to_pixels(move, board)
+
     move_coords[:2] += board.corners[0] - board.sq_size
     move_coords[2:] += board.corners[0] - board.sq_size
 
@@ -27,6 +28,10 @@ def play_move(board, move):
     x1, y1, x2, y2 = move_coords
     pg.moveTo(x1, y1)
     pg.dragTo(x2, y2, button="left")
+    promotion = "qnrb".find(move.lower()[-1])
+    if promotion != -1:
+        pg.moveTo(x2, y2 + promotion * board.sq_size)
+        pg.click()
 
 
 def get_turn():

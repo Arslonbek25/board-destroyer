@@ -67,8 +67,10 @@ class Board:
         self.opp_move_start_time = time.time()
 
     def get_best_move(self):
+        t = self.get_move_time() if not self.clock.tc.depth else None
         result = self.engine.play(
-            self.board, chess.engine.Limit(time=self.get_move_time())
+            self.board,
+            chess.engine.Limit(time=t, depth=self.clock.tc.depth),
         )
         return str(result.move)
 
