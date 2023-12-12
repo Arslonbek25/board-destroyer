@@ -7,9 +7,9 @@ class TimeControl:
 
 
 class Config:
-    rapid = TimeControl(0.3, 15, 5)
-    blitz = TimeControl(0.3, 6, 4)
-    bullet = TimeControl(0.1, 0.6, 4)
+    rapid = TimeControl(0.5, 15, 4)
+    blitz = TimeControl(0.3, 6, 3)
+    bullet = TimeControl(0.1, 1, 4)
     puzzle = TimeControl(0.1, 0.3, 20, 20)
 
     time_advantage_percent = 20
