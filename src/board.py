@@ -53,6 +53,7 @@ class Board:
 
     def get_move_time(self):
         if self.obvious_move:
+            self.clock.opponent_total_time += self.opp_move_time
             return self.clock.tc.min_time
 
         num_pieces = len(self.board.piece_map())
@@ -60,7 +61,7 @@ class Board:
 
         return newtime
 
-    def track_opp_move_time(self):
+    def end_opp_move_time(self):
         self.opp_move_time = self.last_update - self.opp_move_start_time
 
     def start_opp_move_time(self):

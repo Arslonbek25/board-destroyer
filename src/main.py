@@ -15,7 +15,7 @@ def run():
             board.set_fen(fen)
         if board.pos_changed():
             if not board.is_our_turn():
-                board.track_opp_move_time()
+                board.end_opp_move_time()
                 if not is_first_run:
                     move_made = analysis.find_move(board)
                     board.push_move(move_made)
