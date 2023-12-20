@@ -10,9 +10,8 @@ import pyautogui as pg
 
 import control
 from clock import Clock
-from detect import getBoardCorners
-
 from config import Config
+from detect import getBoardCorners
 
 
 class Board:
@@ -74,7 +73,7 @@ class Board:
 
     def analyze_board(self):
         lines = self.engine.analyse(
-            self.board, chess.engine.Limit(depth=14), multipv=Config.lines
+            self.board, chess.engine.Limit(depth=12), multipv=Config.lines
         )
         self.top_lines = [line.get("pv") for line in lines]
 
