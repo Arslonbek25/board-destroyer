@@ -1,3 +1,5 @@
+import threading
+
 import analysis
 import control
 import detect
@@ -27,6 +29,8 @@ def run():
                 board.start_opp_move_time()
                 board.pos = analysis.get_board_position(board.board)
                 board.switch_turn()
+                board.calc_thread = threading.Thread(target=board.analyze_board)
+                board.calc_thread.start()
     print("Game over\n")
 
 

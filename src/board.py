@@ -12,23 +12,28 @@ import control
 from clock import Clock
 from detect import getBoardCorners
 
+from config import Config
+
 
 class Board:
+    IMG_SIZE = 640
+
     def __init__(self, util=False):
-        self.IMG_SIZE = 640
-        self.sct = mss.mss()
         if not util:
             self.turn = control.get_turn()
             self.color = control.get_color()
             self.timecontrol = control.get_timecontrol()
             self.clock = Clock(self.timecontrol)
             self._init_engine()
+        self.sct = mss.mss()
         self._init_board()
         self.prev_pos = None
         self.board = None
+        self.calc_thread = None
+        self.top_lines = []
+        self.obvious_move = False
         self.opp_move_start_time = time.time()
         self.opp_move_time = self.clock.tc.min_time
-        self.obvious_move = False
 
     def update(self):
         self.last_update = time.time()
@@ -67,11 +72,25 @@ class Board:
     def start_opp_move_time(self):
         self.opp_move_start_time = time.time()
 
+    def analyze_board(self):
+        lines = self.engine.analyse(
+            self.board, chess.engine.Limit(depth=14), multipv=Config.lines
+        )
+        self.top_lines = [line.get("pv") for line in lines]
+
     def get_best_move(self):
-        t = self.get_move_time() if not self.clock.tc.depth else None
+        if self.calc_thread:
+            last_move = self.board.move_stack[-1]
+            self.calc_thread.join()
+            for line in self.top_lines:
+                if line[0] == last_move:
+                    return str(line[1])
+
+        t = None if self.clock.tc.depth else self.get_move_time()
         result = self.engine.play(
             self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
         )
+
         return str(result.move)
 
     def switch_turn(self, is_first_run=False):
@@ -152,7 +171,7 @@ class Board:
         ]
 
     def _resize(self):
-        scale = self.IMG_SIZE / self.img.shape[0]
+        scale = Board.IMG_SIZE / self.img.shape[0]
         self.img = cv2.resize(
             self.img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR
         )
