@@ -6,15 +6,16 @@ import numpy as np
 class Clock:
     def __init__(self, config_instance):
         self.config_instance = config_instance
-        self.tc = getattr(config_instance, config_instance.timecontrol)
-        self.time_advantage_percent = config_instance.time_advantage_percent
+        self.tc = config_instance.time_control
+        self.time_advantage = config_instance.time_advantage
         self.k = config_instance.k
         self.randomness_factor = config_instance.randomness_factor
         self.bot_total_time = 0
         self.opponent_total_time = 0
 
     def calculate_move_time(self, opponents_move_time, num_pieces):
-        self.tc = getattr(self.config_instance, self.config_instance.timecontrol)
+        self.tc = self.config_instance.time_control
+        print("Time control:", self.config_instance.time_control)
         print(self.tc.min_time, self.tc.max_time, self.tc.skill_level)
 
         # Update the opponent's total time
@@ -29,7 +30,7 @@ class Clock:
 
         # Calculate the desired bot total time to maintain the time advantage
         desired_bot_total_time = (
-            1 - self.time_advantage_percent / 100
+            1 - self.time_advantage / 100
         ) * self.opponent_total_time
 
         # Check if the bot needs to catch up or maintain the advantage

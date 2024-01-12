@@ -9,7 +9,6 @@ import numpy as np
 import pyautogui as pg
 
 from clock import Clock
-from config import Config
 from detect import getBoardCorners
 
 
@@ -18,6 +17,7 @@ class Board:
 
     def __init__(self, config_instance, util=False):
         if not util:
+            self.config_instance = config_instance
             self.turn = config_instance.turn
             self.color = config_instance.color
             self.clock = Clock(config_instance)
@@ -30,7 +30,7 @@ class Board:
         self.top_lines = []
         self.obvious_move = False
         self.opp_move_start_time = time.time()
-        self.opp_move_time = self.clock.tc.min_time
+        self.opp_move_time = self.config_instance.time_control.min_time
 
     def update(self):
         self.last_update = time.time()
@@ -59,9 +59,9 @@ class Board:
             return self.clock.tc.min_time
 
         num_pieces = len(self.board.piece_map())
-        newtime = self.clock.calculate_move_time(self.opp_move_time, num_pieces)
+        move_time = self.clock.calculate_move_time(self.opp_move_time, num_pieces)
 
-        return newtime
+        return move_time
 
     def end_opp_move_time(self):
         self.opp_move_time = self.last_update - self.opp_move_start_time
@@ -71,7 +71,7 @@ class Board:
 
     def analyze_board(self):
         lines = self.engine.analyse(
-            self.board, chess.engine.Limit(depth=12), multipv=Config.lines
+            self.board, chess.engine.Limit(depth=12), multipv=self.config_instance.lines
         )
         self.top_lines = [line.get("pv") for line in lines]
 
@@ -84,6 +84,7 @@ class Board:
                     return str(line[1])
 
         t = None if self.clock.tc.depth else self.get_move_time()
+        print("MOVE TIME", t)
         result = self.engine.play(
             self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
         )

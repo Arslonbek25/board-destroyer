@@ -1,0 +1,41 @@
+{
+    "time_controls": {
+        "rapid": {
+            "min_time": 0.1,
+            "max_time": 10,
+            "skill_level": 3,
+            "depth": null
+        },
+        "blitz": {
+            "min_time": 0.1,
+            "max_time": 7,
+            "skill_level": 2,
+            "depth": null
+        },
+        "bullet": {
+            "min_time": 0.1,
+            "max_time": 2.2,
+            "skill_level": 1,
+            "depth": null
+        },
+        "puzzle": {
+            "min_time": 0.1,
+            "max_time": 0.1,
+            "skill_level": 20,
+            "depth": 16
+        }
+    },
+    "time_control_name": "rapid",
+    "turn": "b",
+    "color": "b",
+    "game_running": false,
+    "time_advantage": 25.0,
+    "lines": 2.0,
+    "randomness_factor": 0.15,
+    "k": 0.2,
+    "phase_factors": {
+        "opening": 0.3,
+        "middlegame": 1,
+        "endgame": 0.6
+    }
+}

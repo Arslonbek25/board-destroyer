@@ -1,29 +1,33 @@
+import json
+from dataclasses import dataclass
+
+
+@dataclass
 class TimeControl:
-    def __init__(self, min_time, max_time, skill_level, depth=None):
-        self.min_time = min_time
-        self.max_time = max_time
-        self.skill_level = skill_level
-        self.depth = depth
+    min_time: float
+    max_time: float
+    skill_level: int
+    depth: int = None
 
 
+@dataclass
 class Config:
-    rapid = TimeControl(1.5, 15, 3)
-    blitz = TimeControl(0.1, 8, 3)
-    bullet = TimeControl(0.1, 2, 0)
-    puzzle = TimeControl(0.1, 0.3, 20, 16)
+    def load(self):
+        with open("src/settings.json", "r") as file:
+            settings = json.load(file)
+            for key, value in settings.items():
+                if key == "time_controls":
+                    value = {tc: TimeControl(**v) for tc, v in value.items()}
+                setattr(self, key, value)
 
-    turn = "b"
-    color = "b"
-    timecontrol = "puzzle"
-    
-    game_running = False
-    time_advantage_percent = 20
-    lines = 1
-    randomness_factor = 0.15
-    k = 0.15  # The rate of change in base time calculation. Faster for larger k values and slower for smaller k values.
+    def save(self):
+        with open("src/settings.json", "w") as file:
+            settings = self.__dict__.copy()
+            settings["time_controls"] = {
+                k: v.__dict__ for k, v in settings["time_controls"].items()
+            }
+            json.dump(settings, file, indent=4)
 
-    phase_factors = {
-        "opening": 0.3,
-        "middlegame": 1,
-        "endgame": 0.6,
-    }
+    @property
+    def time_control(self):
+        return self.time_controls[self.time_control_name]
