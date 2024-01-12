@@ -8,8 +8,8 @@ from main import run
 
 class BoardDestroyer:
     def __init__(self):
-        self.config_instance = Config()
-        self.config_instance.load()
+        self.config = Config()
+        self.config.load()
         self.max_time_slider = None
         self.setup_ui()
 
@@ -34,7 +34,7 @@ class BoardDestroyer:
                     ["Rapid", "Blitz", "Bullet", "Puzzle"], on_change=self.on_tc_change
                 )
                 .bind_value(
-                    self.config_instance,
+                    self.config,
                     "time_control_name",
                     forward=lambda x: x.lower(),
                     backward=lambda x: x.capitalize(),
@@ -43,7 +43,7 @@ class BoardDestroyer:
             )
             self.color_toggle = ui.toggle(
                 ["White", "Black"],
-                value="White" if self.config_instance.color == "w" else "Black",
+                value="White" if self.config.color == "w" else "Black",
                 on_change=self.on_color_change,
             ).props("no-caps")
 
@@ -52,7 +52,7 @@ class BoardDestroyer:
                 "Start", on_click=self.toggle_game_running
             ).props("no-caps")
             ui.button(
-                "Save", color="#32312F", on_click=self.config_instance.save
+                "Save", color="#32312F", on_click=self.config.save
             ).props("no-caps")
 
         self.create_time_control_sliders()
@@ -70,7 +70,7 @@ class BoardDestroyer:
                     max=1,
                     step=0.1,
                     on_change=self.on_min_time_change,
-                    value=self.config_instance.time_control.max_time,
+                    value=self.config.time_control.min_time,
                 )
                 ui.label().bind_text_from(self.min_time_slider, "value")
 
@@ -80,7 +80,7 @@ class BoardDestroyer:
                     max=15,
                     step=0.1,
                     on_change=self.on_max_time_change,
-                    value=self.config_instance.time_control.max_time,
+                    value=self.config.time_control.max_time,
                 )
                 ui.label().bind_text_from(self.max_time_slider, "value")
 
@@ -92,12 +92,12 @@ class BoardDestroyer:
                 max=20,
                 step=1,
                 on_change=self.on_skill_level_change,
-                value=self.config_instance.time_control.skill_level,
+                value=self.config.time_control.skill_level,
             )
             ui.label().bind_text_from(self.skill_level_slider, "value")
 
     def create_extra_options(self):
-        with ui.row():
+        with ui.row().classes("w-full no-wrap"):
             ui.number(
                 label="Time advantage",
                 value=20,
@@ -105,14 +105,14 @@ class BoardDestroyer:
                 min=0,
                 max=50,
                 on_change=self.on_time_advantage_change,
-            ).style("width: 90px")
+            ).classes("w-1/4")
             ui.number(
                 label="Anticipate lines",
                 value=1,
                 min=0,
                 max=10,
                 on_change=self.on_lines_change,
-            ).style("width: 90px")
+            ).classes("w-1/4")
             ui.number(
                 label="K",
                 value=0.15,
@@ -120,59 +120,64 @@ class BoardDestroyer:
                 step=0.05,
                 max=1,
                 on_change=self.on_k_change,
-            ).style("width: 90px")
+            ).classes("w-1/4")
             ui.number(
-                label="Randomness Factor",
+                label="Randomness",
                 value=0.15,
                 min=0,
                 step=0.05,
                 max=1,
                 on_change=self.on_randomness_factor_change,
-            ).style("width: 115px")
+            ).classes("w-1/4")
 
-    def toggle_game_running(self, e):
-        self.config_instance.game_running = not self.config_instance.game_running
-        if self.config_instance.game_running:
-            threading.Thread(target=run, args=(self.config_instance,)).start()
+    def stop_game(self):
+        self.start_button.props("color=primary").set_text("Start")
+        self.config.game_running = False
+
+    def toggle_game_running(self):
+        self.config.game_running = not self.config.game_running
+        if self.config.game_running:
+            threading.Thread(
+                target=run, args=(self.config, self.stop_game)
+            ).start()
             self.start_button.props("color=red").set_text("Stop")
         else:
-            self.start_button.props("color=primary").set_text("Start")
+            self.stop_game()
 
     def on_tc_change(self, e):
         if self.max_time_slider:
-            self.max_time_slider.value = self.config_instance.time_control.max_time
-            self.min_time_slider.value = self.config_instance.time_control.min_time
+            self.max_time_slider.value = self.config.time_control.max_time
+            self.min_time_slider.value = self.config.time_control.min_time
             self.skill_level_slider.value = (
-                self.config_instance.time_control.skill_level
+                self.config.time_control.skill_level
             )
 
     def on_color_change(self, e):
-        self.config_instance.color = e.value[0].lower()
+        self.config.color = e.value[0].lower()
 
     def on_min_time_change(self, e):
-        self.config_instance.time_control.min_time = e.value
+        self.config.time_control.min_time = e.value
         self.min_time_slider.value = min(self.max_time_slider.value, e.value)
 
     def on_max_time_change(self, e):
-        self.config_instance.time_control.max_time = e.value
+        self.config.time_control.max_time = e.value
         self.max_time_slider.value = max(self.min_time_slider.value, e.value)
 
     def on_skill_level_change(self, e):
-        self.config_instance.time_control.skill_level = e.value
+        self.config.time_control.skill_level = e.value
 
     def on_time_advantage_change(self, e):
-        self.config_instance.time_advantage = e.value
+        self.config.time_advantage = e.value
 
     def on_lines_change(self, e):
-        self.config_instance.lines = e.value
+        self.config.lines = e.value
 
     def on_k_change(self, e):
-        self.config_instance.k = e.value
+        self.config.k = e.value
 
     def on_randomness_factor_change(self, e):
-        self.config_instance.randomness_factor = e.value
+        self.config.randomness_factor = e.value
 
 
 app = BoardDestroyer()
-ui.run(native=True, window_size=(500, 400), title="Board Destroyer")
 ui.run(native=True, window_size=(500, 400), title="Board Destroyer")

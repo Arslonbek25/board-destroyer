@@ -58,8 +58,10 @@ class Clock:
             return "opening"
         elif num_pieces >= 16:
             return "middlegame"
-        else:
+        elif num_pieces >= 6:
             return "endgame"
+        else:
+            return "late_endgame"
 
     def calculate_base_time(self, opponents_move_time, max_time):
         if opponents_move_time <= max_time:

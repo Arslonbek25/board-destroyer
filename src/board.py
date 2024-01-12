@@ -122,6 +122,9 @@ class Board:
                 )
                 self.obvious_move |= is_threat
 
+    def focus(self):
+        pg.click(self.corners[0, 0], self.corners[0, 1])
+
     def _init_board(self):
         while True:
             try:
