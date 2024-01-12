@@ -2,25 +2,27 @@ import random
 
 import numpy as np
 
-from config import Config
-
 
 class Clock:
-    def __init__(self, timecontrol):
-        self.tc = getattr(Config, timecontrol)
-        self.time_advantage_percent = Config.time_advantage_percent
-        self.k = Config.k
-        self.randomness_factor = Config.randomness_factor
+    def __init__(self, config_instance):
+        self.config_instance = config_instance
+        self.tc = getattr(config_instance, config_instance.timecontrol)
+        self.time_advantage_percent = config_instance.time_advantage_percent
+        self.k = config_instance.k
+        self.randomness_factor = config_instance.randomness_factor
         self.bot_total_time = 0
         self.opponent_total_time = 0
 
     def calculate_move_time(self, opponents_move_time, num_pieces):
+        self.tc = getattr(self.config_instance, self.config_instance.timecontrol)
+        print(self.tc.min_time, self.tc.max_time, self.tc.skill_level)
+
         # Update the opponent's total time
         self.opponent_total_time += opponents_move_time
 
         # Determine the game phase and adjust max_time
         phase = self.get_phase(num_pieces)
-        max_time = self.tc.max_time * Config.phase_factors[phase]
+        max_time = self.tc.max_time * self.config_instance.phase_factors[phase]
 
         # Calculate base move time
         base_move_time = self.calculate_base_time(opponents_move_time, max_time)

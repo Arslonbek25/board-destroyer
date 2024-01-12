@@ -7,13 +7,18 @@ class TimeControl:
 
 
 class Config:
-    rapid = TimeControl(0.6, 20, 4)
-    blitz = TimeControl(0.3, 6, 3)
-    bullet = TimeControl(0.1, 2, 2)
+    rapid = TimeControl(1.5, 15, 3)
+    blitz = TimeControl(0.1, 8, 3)
+    bullet = TimeControl(0.1, 2, 0)
     puzzle = TimeControl(0.1, 0.3, 20, 16)
 
-    time_advantage_percent = 10
-    lines = 3
+    turn = "b"
+    color = "b"
+    timecontrol = "puzzle"
+    
+    game_running = False
+    time_advantage_percent = 20
+    lines = 1
     randomness_factor = 0.15
     k = 0.15  # The rate of change in base time calculation. Faster for larger k values and slower for smaller k values.
 

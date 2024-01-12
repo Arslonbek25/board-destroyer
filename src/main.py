@@ -6,9 +6,9 @@ import detect
 from board import Board
 
 
-def run():
-    board = Board()
-    while not board.game_over():
+def run(config_instance):
+    board = Board(config_instance)
+    while config_instance.game_running and not board.game_over():
         board.update()
         board.pos = detect.find_pieces(board)
         is_first_run = board.prev_pos is None
@@ -31,8 +31,5 @@ def run():
                 board.switch_turn()
                 board.calc_thread = threading.Thread(target=board.analyze_board)
                 board.calc_thread.start()
-    print("Game over\n")
-
-
-if __name__ == "__main__":
-    run()
+    print("Game stopped\n")
+    board.engine.quit()

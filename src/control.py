@@ -32,28 +32,3 @@ def play_move(board, move: str):
     if promotion != -1:
         pg.moveTo(x2, y2 + promotion * board.sq_size)
         pg.click()
-
-
-def get_turn():
-    turn = ""
-    while turn not in ["b", "w"]:
-        turn = input("Whose turn is it? (b/w): \n")
-    return turn
-
-
-def get_color():
-    turn = ""
-    while turn not in ["b", "w"]:
-        turn = input("What color are you playing? (b/w): \n")
-    return turn
-
-
-def get_timecontrol():
-    tc_map = {"1": "bullet", "2": "blitz", "3": "rapid", "4": "puzzle"}
-    options = ", ".join(tc_map.values())
-    while True:
-        inp = input(f"Enter time control [{options}]: \n").strip().lower()
-        if inp in tc_map.values():
-            return inp
-        if inp in tc_map:
-            return tc_map[inp]

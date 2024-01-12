@@ -8,7 +8,6 @@ import mss
 import numpy as np
 import pyautogui as pg
 
-import control
 from clock import Clock
 from config import Config
 from detect import getBoardCorners
@@ -17,12 +16,11 @@ from detect import getBoardCorners
 class Board:
     IMG_SIZE = 640
 
-    def __init__(self, util=False):
+    def __init__(self, config_instance, util=False):
         if not util:
-            self.turn = control.get_turn()
-            self.color = control.get_color()
-            self.timecontrol = control.get_timecontrol()
-            self.clock = Clock(self.timecontrol)
+            self.turn = config_instance.turn
+            self.color = config_instance.color
+            self.clock = Clock(config_instance)
             self._init_engine()
         self.sct = mss.mss()
         self._init_board()
