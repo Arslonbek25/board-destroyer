@@ -7,9 +7,9 @@ from board import Board
 import chess
 
 
-def run(config_instance, stop_game=None):
-    board = Board(config_instance)
-    while config_instance.game_running and not board.game_over():
+def run(config, stop_game=None):
+    board = Board(config)
+    while config.game_running and not board.game_over():
         board.update()
         try:
             board.pos = detect.find_pieces(board)
@@ -39,7 +39,7 @@ def run(config_instance, stop_game=None):
                 board.start_opp_move_time()
                 board.pos = analysis.get_board_position(board.board)
                 board.switch_turn()
-                if config_instance.lines > 0:
+                if config.lines > 0:
                     board.calc_thread = threading.Thread(target=board.analyze_board)
                     board.calc_thread.start()
     print("Game stopped\n")

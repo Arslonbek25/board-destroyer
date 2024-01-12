@@ -15,12 +15,12 @@ from detect import getBoardCorners
 class Board:
     IMG_SIZE = 640
 
-    def __init__(self, config_instance, util=False):
+    def __init__(self, config, util=False):
         if not util:
-            self.config_instance = config_instance
-            self.color = config_instance.color
-            self.turn = config_instance.color
-            self.clock = Clock(config_instance)
+            self.config = config
+            self.color = config.color
+            self.turn = config.color
+            self.clock = Clock(config)
             self._init_engine()
         self.sct = mss.mss()
         self._init_board()
@@ -30,7 +30,7 @@ class Board:
         self.top_lines = []
         self.obvious_move = False
         self.opp_move_start_time = time.time()
-        self.opp_move_time = self.config_instance.time_control.min_time
+        self.opp_move_time = self.config.time_control.min_time
 
     def update(self):
         self.last_update = time.time()
@@ -71,7 +71,7 @@ class Board:
 
     def analyze_board(self):
         lines = self.engine.analyse(
-            self.board, chess.engine.Limit(depth=12), multipv=self.config_instance.lines
+            self.board, chess.engine.Limit(depth=12), multipv=self.config.lines
         )
         self.top_lines = [line.get("pv") for line in lines]
 

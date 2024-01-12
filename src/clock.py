@@ -4,24 +4,24 @@ import numpy as np
 
 
 class Clock:
-    def __init__(self, config_instance):
-        self.config_instance = config_instance
-        self.tc = config_instance.time_control
-        self.time_advantage = config_instance.time_advantage
-        self.k = config_instance.k
-        self.randomness_factor = config_instance.randomness_factor
+    def __init__(self, config):
+        self.config = config
+        self.tc = config.time_control
+        self.time_advantage = config.time_advantage
+        self.k = config.k
+        self.randomness_factor = config.randomness_factor
         self.bot_total_time = 0
         self.opponent_total_time = 0
 
     def calculate_move_time(self, opponents_move_time, num_pieces):
-        self.tc = self.config_instance.time_control
+        self.tc = self.config.time_control
 
         # Update the opponent's total time
         self.opponent_total_time += opponents_move_time
 
         # Determine the game phase and adjust max_time
         phase = self.get_phase(num_pieces)
-        max_time = self.tc.max_time * self.config_instance.phase_factors[phase]
+        max_time = self.tc.max_time * self.config.phase_factors[phase]
 
         # Calculate base move time
         base_move_time = self.calculate_base_time(opponents_move_time, max_time)
