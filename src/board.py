@@ -106,13 +106,13 @@ class Board:
 
     def push_move(self, move):
         uci = chess.Move.from_uci(move)
-        is_capture = self.board.is_capture(uci)
-
+        # is_capture = self.board.is_capture(uci)
+        # TODO: Check if move is recapture instead
         self.board.push_san(move)
 
         if not self.is_our_turn():
             is_check = self.board.is_check()
-            self.obvious_move = is_capture or is_check
+            self.obvious_move = is_check
 
             if self.board.piece_at(uci.to_square).piece_type == chess.PAWN:
                 is_threat = any(
