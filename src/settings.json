@@ -8,7 +8,7 @@
         },
         "blitz": {
             "min_time": 0.1,
-            "max_time": 7,
+            "max_time": 10,
             "skill_level": 2,
             "depth": null
         },
@@ -26,8 +26,7 @@
         }
     },
     "time_control_name": "rapid",
-    "turn": "b",
-    "color": "b",
+    "color": "w",
     "game_running": false,
     "time_advantage": 25.0,
     "lines": 2.0,

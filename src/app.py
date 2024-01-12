@@ -43,7 +43,7 @@ class BoardDestroyer:
             )
             self.color_toggle = ui.toggle(
                 ["White", "Black"],
-                value="White",  # self.config_instance.color.capitalize(),
+                value="White" if self.config_instance.color == "w" else "Black",
                 on_change=self.on_color_change,
             ).props("no-caps")
 
@@ -139,8 +139,6 @@ class BoardDestroyer:
             self.start_button.props("color=primary").set_text("Start")
 
     def on_tc_change(self, e):
-        print("Time control changed to", self.config_instance.time_control_name)
-        print("Max", self.config_instance.time_control.max_time)
         if self.max_time_slider:
             self.max_time_slider.value = self.config_instance.time_control.max_time
             self.min_time_slider.value = self.config_instance.time_control.min_time
@@ -150,7 +148,6 @@ class BoardDestroyer:
 
     def on_color_change(self, e):
         self.config_instance.color = e.value[0].lower()
-        print("Color changed to", e.value)
 
     def on_min_time_change(self, e):
         self.config_instance.time_control.min_time = e.value

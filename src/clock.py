@@ -15,8 +15,6 @@ class Clock:
 
     def calculate_move_time(self, opponents_move_time, num_pieces):
         self.tc = self.config_instance.time_control
-        print("Time control:", self.config_instance.time_control)
-        print(self.tc.min_time, self.tc.max_time, self.tc.skill_level)
 
         # Update the opponent's total time
         self.opponent_total_time += opponents_move_time

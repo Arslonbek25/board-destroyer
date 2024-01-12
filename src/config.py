@@ -1,5 +1,14 @@
 import json
 from dataclasses import dataclass
+from enum import Enum, auto
+
+
+class Color(Enum):
+    WHITE = "white"
+    BLACK = "black"
+
+    def __str__(self):
+        return self.name.lower()
 
 
 @dataclass

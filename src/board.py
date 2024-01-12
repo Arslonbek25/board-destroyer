@@ -18,8 +18,8 @@ class Board:
     def __init__(self, config_instance, util=False):
         if not util:
             self.config_instance = config_instance
-            self.turn = config_instance.turn
             self.color = config_instance.color
+            self.turn = config_instance.color
             self.clock = Clock(config_instance)
             self._init_engine()
         self.sct = mss.mss()
@@ -84,7 +84,6 @@ class Board:
                     return str(line[1])
 
         t = None if self.clock.tc.depth else self.get_move_time()
-        print("MOVE TIME", t)
         result = self.engine.play(
             self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
         )
