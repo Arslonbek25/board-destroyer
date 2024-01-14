@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from enum import Enum, auto
 
-
+# TODO: Refactor color to enum
 class Color(Enum):
     WHITE = "white"
     BLACK = "black"

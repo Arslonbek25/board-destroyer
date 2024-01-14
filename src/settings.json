@@ -7,14 +7,14 @@
             "depth": null
         },
         "blitz": {
-            "min_time": 0.1,
-            "max_time": 7,
-            "skill_level": 2,
+            "min_time": 0.2,
+            "max_time": 6,
+            "skill_level": 1,
             "depth": null
         },
         "bullet": {
             "min_time": 0.1,
-            "max_time": 2.2,
+            "max_time": 1.6,
             "skill_level": 1,
             "depth": null
         },
@@ -28,14 +28,14 @@
     "time_control_name": "blitz",
     "color": "w",
     "game_running": false,
-    "time_advantage": 25.0,
-    "lines": 2.0,
+    "time_advantage": 20,
+    "lines": 0,
     "randomness_factor": 0.15,
-    "k": 0.2,
+    "k": 0.3,
     "phase_factors": {
-        "opening": 0.3,
+        "opening": 0.1,
         "middlegame": 1,
-        "endgame": 0.6,
+        "endgame": 0.5,
         "late_endgame": 0.3
     }
 }

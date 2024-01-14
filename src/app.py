@@ -41,19 +41,25 @@ class BoardDestroyer:
                 )
                 .props("no-caps")
             )
-            self.color_toggle = ui.toggle(
-                ["White", "Black"],
-                value="White" if self.config.color == "w" else "Black",
-                on_change=self.on_color_change,
-            ).props("no-caps")
+            self.color_toggle = (
+                ui.toggle(["White", "Black"])
+                .props("no-caps")
+                .bind_value(
+                    self.config,
+                    "color",
+                    forward=lambda x: x[0].lower(),
+                    backward=lambda x: "White" if x == "w" else "Black",
+                )
+            )
 
         with ui.footer(fixed=False).style("background-color: #21201D"):
             self.start_button = ui.button(
                 "Start", on_click=self.toggle_game_running
             ).props("no-caps")
-            ui.button(
-                "Save", color="#32312F", on_click=self.config.save
-            ).props("no-caps")
+            ui.button("Reset", color="#32312F", on_click=self.reset).props("no-caps")
+            ui.button("Save", color="#32312F", on_click=self.config.save).props(
+                "no-caps"
+            )
 
         self.create_time_control_sliders()
         self.create_skill_level_slider()
@@ -87,48 +93,33 @@ class BoardDestroyer:
     def create_skill_level_slider(self):
         ui.label("Skill level:")
         with ui.row().classes("w-full no-wrap"):
-            self.skill_level_slider = ui.slider(
-                min=0,
-                max=20,
-                step=1,
-                on_change=self.on_skill_level_change,
-                value=self.config.time_control.skill_level,
+            self.skill_level_slider = ui.slider(min=0, max=20, step=1).bind_value(
+                self.config.time_control, "skill_level"
             )
             ui.label().bind_text_from(self.skill_level_slider, "value")
 
     def create_extra_options(self):
         with ui.row().classes("w-full no-wrap"):
-            ui.number(
-                label="Time advantage",
-                value=20,
-                step=5,
-                min=0,
-                max=50,
-                on_change=self.on_time_advantage_change,
-            ).classes("w-1/4")
-            ui.number(
-                label="Anticipate lines",
-                value=1,
-                min=0,
-                max=10,
-                on_change=self.on_lines_change,
-            ).classes("w-1/4")
-            ui.number(
-                label="K",
-                value=0.15,
-                min=0.05,
-                step=0.05,
-                max=1,
-                on_change=self.on_k_change,
-            ).classes("w-1/4")
-            ui.number(
-                label="Randomness",
-                value=0.15,
-                min=0,
-                step=0.05,
-                max=1,
-                on_change=self.on_randomness_factor_change,
-            ).classes("w-1/4")
+            self.time_advantage_slider = (
+                ui.number(label="Time advantage", step=5, min=0, max=50)
+                .classes("w-1/4")
+                .bind_value(self.config, "time_advantage", backward=int, forward=int)
+            )
+            self.lines_slider = (
+                ui.number(label="Anticipate lines", min=0, max=10)
+                .classes("w-1/4")
+                .bind_value(self.config, "lines", backward=int, forward=int)
+            )
+            self.k_slider = (
+                ui.number(label="K", min=0.05, step=0.05, max=1)
+                .classes("w-1/4")
+                .bind_value(self.config, "k")
+            )
+            self.randomness_factor_slider = (
+                ui.number(label="Randomness", min=0, step=0.05, max=1)
+                .classes("w-1/4")
+                .bind_value(self.config, "randomness_factor")
+            )
 
     def stop_game(self):
         self.start_button.props("color=primary").set_text("Start")
@@ -137,23 +128,20 @@ class BoardDestroyer:
     def toggle_game_running(self):
         self.config.game_running = not self.config.game_running
         if self.config.game_running:
-            threading.Thread(
-                target=run, args=(self.config, self.stop_game)
-            ).start()
+            threading.Thread(target=run, args=(self.config, self.stop_game)).start()
             self.start_button.props("color=red").set_text("Stop")
         else:
             self.stop_game()
 
-    def on_tc_change(self, e):
+    def on_tc_change(self):
         if self.max_time_slider:
             self.max_time_slider.value = self.config.time_control.max_time
             self.min_time_slider.value = self.config.time_control.min_time
-            self.skill_level_slider.value = (
-                self.config.time_control.skill_level
-            )
+            self.skill_level_slider.value = self.config.time_control.skill_level
 
-    def on_color_change(self, e):
-        self.config.color = e.value[0].lower()
+    def reset(self):
+        self.config.load()
+        self.on_tc_change()
 
     def on_min_time_change(self, e):
         self.config.time_control.min_time = e.value
@@ -162,21 +150,6 @@ class BoardDestroyer:
     def on_max_time_change(self, e):
         self.config.time_control.max_time = e.value
         self.max_time_slider.value = max(self.min_time_slider.value, e.value)
-
-    def on_skill_level_change(self, e):
-        self.config.time_control.skill_level = e.value
-
-    def on_time_advantage_change(self, e):
-        self.config.time_advantage = e.value
-
-    def on_lines_change(self, e):
-        self.config.lines = e.value
-
-    def on_k_change(self, e):
-        self.config.k = e.value
-
-    def on_randomness_factor_change(self, e):
-        self.config.randomness_factor = e.value
 
 
 app = BoardDestroyer()
