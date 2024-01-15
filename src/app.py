@@ -1,6 +1,6 @@
 import threading
 
-from nicegui import ui
+from nicegui import app, ui
 
 from config import Config
 from main import run
@@ -14,6 +14,7 @@ class BoardDestroyer:
         self.setup_ui()
 
     def setup_ui(self):
+        app.native.window_args["resizable"] = False
         ui.colors(primary="#8DB45B")
         ui.query("body").style(
             "background-color: #302E2B; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Helvetica,Arial,sans-serif;"
