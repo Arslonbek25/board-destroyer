@@ -15,13 +15,14 @@ from detect import getBoardCorners
 class Board:
     IMG_SIZE = 640
 
-    def __init__(self, config, util=False):
+    def __init__(self, config=None, util=False):
         if not util:
             self.config = config
             self.color = config.color
             self.turn = config.color
             self.clock = Clock(config)
             self._init_engine()
+            self.opp_move_time = self.config.time_control.min_time
         self.sct = mss.mss()
         self._init_board()
         self.prev_pos = None
@@ -30,7 +31,6 @@ class Board:
         self.top_lines = []
         self.obvious_move = False
         self.opp_move_start_time = time.time()
-        self.opp_move_time = self.config.time_control.min_time
 
     def update(self):
         self.last_update = time.time()
@@ -108,7 +108,7 @@ class Board:
         uci = chess.Move.from_uci(move)
         is_capture = (
             self.board.is_capture(uci)
-            and self.board.piece_at(uci.to_square).piece_type != chess.PAWN
+            and self.board.piece_at(uci.from_square).piece_type != chess.PAWN
         )
         self.obvious_move = is_capture
         self.board.push_san(move)

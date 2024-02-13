@@ -1,6 +1,7 @@
 import os
 import platform
 import random
+import sys
 import time
 import urllib.parse
 import webbrowser
@@ -8,8 +9,7 @@ import webbrowser
 import chess
 import pyautogui
 
-import sys
-import os
+from src.config import Config
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
@@ -26,8 +26,9 @@ def random_pawns(piece):
     )
 
 
-def generate_balanced_chess_com_links(n_pos, num_moves=10):
+def generate_balanced_chess_com_links(n_pos, num_moves=10, site="chess"):
     base_url = "https://www.chess.com/practice/custom?"
+    lichess_base_url = "https://lichess.org/editor/"
     links = []
 
     for _ in range(n_pos):
@@ -52,22 +53,32 @@ def generate_balanced_chess_com_links(n_pos, num_moves=10):
         if len(moves_made) != num_moves:
             continue
 
+        # print("Move history", moves_made)
+        print("FEN:", board.fen())  # Print the FEN of the board
+
         encoded_moves = "%20".join(moves_made)
-        links.append(
-            f"{base_url}fen={urllib.parse.quote(fen)}&moveList={encoded_moves}"
-        )
+        if site == "chess":
+            links.append(
+                f"{base_url}fen={urllib.parse.quote(board.fen())}&moveList={encoded_moves}"
+            )
+        elif site == "lichess":
+            links.append(f"{lichess_base_url}{board.fen()}")
 
     return links
 
 
-def open_and_close_links(links, wait_time=5):
+def open_and_close_links(links, wait_time=3):
     board = None
+    config = Config()
+    config.load()
+
     for link in links:
         webbrowser.open(link)
         time.sleep(wait_time)
 
         if board is None:
             time.sleep(2)
+
             board = Board(util=True)
 
         board.update()
@@ -83,5 +94,5 @@ if __name__ == "__main__":
     os.makedirs("screenshots", exist_ok=True)
 
     # num_moves has to be an even number to prevent the bot making a move
-    links = generate_balanced_chess_com_links(n_pos=5, num_moves=64)
+    links = generate_balanced_chess_com_links(n_pos=5, num_moves=40, site="lichess")
     open_and_close_links(links)
