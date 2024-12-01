@@ -13,6 +13,7 @@ This project has been tested on macOS. It does not work on other operating syste
 - **Universal Compatibility**: Seamlessly integrates with any chess website.
 - **YOLO-Powered**: Uses YOLO for precise and rapid chess piece identification.
 - **Stockfish**: Employs Stockfish for in-depth board analysis and optimal move selection.
+- **Customizable Settings**: Time control and engine settings can be customized through the UI.
 
 
 ## How to Use
