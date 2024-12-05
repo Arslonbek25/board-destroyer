@@ -52,6 +52,8 @@ This project has been tested on MacOS Sonoma. It does not work on other operatin
    python src/app.py
    ```
 
+   > **Note**: Launching the app may take a while as the YOLO model is loaded.
+
 7. **Click the start button** on the UI that pops up, sit back and watch Board Destroyer dominate the board for you.
 
 ## Troubleshooting
