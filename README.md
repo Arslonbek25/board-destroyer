@@ -6,7 +6,7 @@ Board Destroyer is an intelligent automation tool that plays browser-based chess
 
 ## Compatibility
 
-This project has been tested on macOS. It does not work on other operating systems.
+This project has been tested on MacOS Sonoma. It does not work on other operating systems.
 
 ## Features
 
@@ -20,14 +20,14 @@ This project has been tested on macOS. It does not work on other operating syste
 
 1. Activate the virtual environment.
 2. Install the necessary dependencies by running `pip install -r requirements.txt`.
-3. Download and install the binary version of the Stockfish engine from the [official website](https://stockfishchess.org/download/). Ensure that it is added to your system's PATH so that it can be accessed by running 'stockfish' on the terminal.
-4. Run `src/app.py`.
-5. Open your favorite chess website like Chess.com or Lichess.
-6. Sit back and watch Board Destroyer dominate the board for you.
+3. Download and install the binary version of the Stockfish engine from the [official website](https://stockfishchess.org/download/). Make absolutely sure that it is added to your system's PATH so that it can be accessed by running 'stockfish' on the terminal. You should receive output when you run stockfish on terminal.
+5. Open your preferred chess website, such as Chess.com or Lichess. If using Chess.com, ensure the default green theme is selected and set piece animations to "None" in the Chess.com settings.
+4. With venv activated, run `src/app.py`.
+6. Click the start button on the UI that pops up, sit back and watch Board Destroyer dominate the board for you.
 
 ## Troubleshooting
 
-If the software does not run for some reason, it is due to an installation or configuration issue. The software has been thoroughly tested and works as expected. Make sure all steps are followed correctly.
+If the software does not run for some reason, it is due to an installation or configuration issue. The software has been thoroughly tested and works as expected on MacOS Sonoma. Make sure all steps are followed correctly.
 
 ## License
 
