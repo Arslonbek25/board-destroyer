@@ -19,7 +19,7 @@ This project has been tested on MacOS Sonoma. It does not work on other operatin
 
 1. Activate the virtual environment.
 2. Install the necessary dependencies by running `pip install -r requirements.txt`.
-3. Download and install the binary version of the Stockfish engine from the [official website](https://stockfishchess.org/download/). Make absolutely sure that it is added to your system's PATH so that it can be accessed by running 'stockfish' on the terminal. You should receive output when you run stockfish on terminal.
+3. Download and install the binary version of the Stockfish engine from the [official website](https://stockfishchess.org/download/). Ensure that it is added to your system's PATH so that it can be accessed by running `stockfish` in the terminal. You should receive output when you run `stockfish` in the terminal. If there's no output, you need to manually add the binary to your PATH. Use Google to find out how to do this.
 4. Open your preferred chess website, such as Chess.com or Lichess. If using Chess.com, ensure the default green theme is selected and set piece animations to "None" in the Chess.com settings.
 5. With venv activated, run `src/app.py`.
 6. Click the start button on the UI that pops up, sit back and watch Board Destroyer dominate the board for you.
