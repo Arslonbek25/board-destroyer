@@ -15,37 +15,28 @@ class Clock:
 
     def calculate_move_time(self, opponents_move_time, num_pieces):
         self.tc = self.config.time_control
-
-        # Update the opponent's total time
         self.opponent_total_time += opponents_move_time
 
-        # Determine the game phase and adjust max_time
         phase = self.get_phase(num_pieces)
         max_time = self.tc.max_time * self.config.phase_factors[phase]
 
-        # Calculate base move time
         base_move_time = self.calculate_base_time(opponents_move_time, max_time)
 
-        # Calculate the desired bot total time to maintain the time advantage
         desired_bot_total_time = (
             1 - self.time_advantage / 100
         ) * self.opponent_total_time
 
-        # Check if the bot needs to catch up or maintain the advantage
         if self.bot_total_time > desired_bot_total_time:
-            # Bot needs to catch up
-            adjustment_factor = 0.5  # Adjust this factor for smoothness
+
+            adjustment_factor = 0.5
             time_difference = desired_bot_total_time - self.bot_total_time
             move_time = base_move_time + adjustment_factor * time_difference
         else:
-            # Bot has the advantage or is on par, continue with normal play
             move_time = base_move_time
 
-        # Ensure move time is within acceptable range
         move_time = min(move_time, opponents_move_time)
         move_time = min(max(move_time, self.tc.min_time), max_time)
 
-        # Add randomness to avoid predictability
         move_time *= random.uniform(
             1 - self.randomness_factor, 1 + self.randomness_factor
         )
