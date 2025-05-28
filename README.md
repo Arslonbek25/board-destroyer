@@ -6,7 +6,7 @@ Board Destroyer is an intelligent automation tool that plays browser-based chess
 
 ## Compatibility
 
-This project has been tested on MacOS Sonoma. It does not work on other operating systems.
+This project has been tested on MacOS Sonoma and higher versions.
 
 ## Features
 
