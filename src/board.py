@@ -34,6 +34,10 @@ class Board:
         self._prev_thumb = None
         self._thumb_size = 160
         self._last_diff_score = 0.0
+        self.last_capture_ms = 0.0
+        self.last_resize_ms = 0.0
+        self.last_update_ms = 0.0
+        self.last_engine_move_ms = 0.0
 
     def update(self):
         self.last_update = time.time()
@@ -45,11 +49,9 @@ class Board:
         self._resize()
         t2 = time.perf_counter()
         
-        print(
-            f"[Board.update] capture={(t1 - t0)*1000:.2f} ms | "
-            f"resize={(t2 - t1)*1000:.2f} ms | "
-            f"total={(t2 - t0)*1000:.2f} ms"
-        )
+        self.last_capture_ms = (t1 - t0) * 1000
+        self.last_resize_ms = (t2 - t1) * 1000
+        self.last_update_ms = (t2 - t0) * 1000
 
     def board_changed_fast(self, threshold: float = 2.2) -> bool:
         """
@@ -151,8 +153,7 @@ class Board:
             self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
         )
         t1 = time.perf_counter()
-        
-        print(f"[Stockfish] move={(t1 - t0)*1000:.2f} ms")
+        self.last_engine_move_ms = (t1 - t0) * 1000
 
         return str(result.move)
 

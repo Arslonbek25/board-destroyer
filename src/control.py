@@ -41,5 +41,4 @@ def play_move(board, move: str):
         pg.click()
     t1 = time.perf_counter()
     
-    print(f"[UI] play_move={(t1 - t0)*1000:.2f} ms")
-    # time.sleep(0.3)  # small delay to ensure the move is registered
+    return (t1 - t0) * 1000

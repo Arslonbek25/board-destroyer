@@ -1,4 +1,5 @@
 {
+    "debug": true,
     "time_controls": {
         "rapid": {
             "min_time": 0.1,
@@ -9,12 +10,12 @@
         "blitz": {
             "min_time": 0.4,
             "max_time": 6.9,
-            "skill_level": 1,
+            "skill_level": 3,
             "depth": null
         },
         "bullet": {
             "min_time": 0.1,
-            "max_time": 1.6,
+            "max_time": 1,
             "skill_level": 3,
             "depth": null
         },
@@ -25,7 +26,7 @@
             "depth": 16
         }
     },
-    "time_control_name": "blitz",
+    "time_control_name": "puzzle",
     "color": "w",
     "game_running": false,
     "time_advantage": 5,
