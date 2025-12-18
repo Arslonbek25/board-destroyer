@@ -31,11 +31,72 @@ class Board:
         self.top_lines = []
         self.obvious_move = False
         self.opp_move_start_time = time.time()
+        self._prev_thumb = None
+        self._thumb_size = 160
+        self._last_diff_score = 0.0
 
     def update(self):
         self.last_update = time.time()
+        
+        t0 = time.perf_counter()
         self._capture_screenshot(cropped=True)
+        t1 = time.perf_counter()
+        
         self._resize()
+        t2 = time.perf_counter()
+        
+        print(
+            f"[Board.update] capture={(t1 - t0)*1000:.2f} ms | "
+            f"resize={(t2 - t1)*1000:.2f} ms | "
+            f"total={(t2 - t0)*1000:.2f} ms"
+        )
+
+    def board_changed_fast(self, threshold: float = 2.2) -> bool:
+        """
+        Fast + reliable board diff.
+        Key property: baseline only updates when frame is 'stable' (< threshold),
+        so slow/gradual changes can't slip under the threshold forever.
+        """
+        img = self.img
+        if img is None:
+            self._last_diff_score = 999.0
+            return True
+
+        gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
+        thumb = cv2.resize(
+            gray,
+            (self._thumb_size, self._thumb_size),
+            interpolation=cv2.INTER_AREA,
+        )
+
+        if self._prev_thumb is None:
+            self._prev_thumb = thumb
+            self._last_diff_score = 999.0
+            return True
+
+        diff = cv2.absdiff(thumb, self._prev_thumb)
+        score = float(diff.mean())
+        self._last_diff_score = score
+
+        # IMPORTANT: Only advance baseline when the scene is stable.
+        if score < threshold:
+            self._prev_thumb = thumb
+
+        return score >= threshold
+
+    def sync_diff_baseline(self) -> None:
+        """
+        Make the diff baseline equal to the current screenshot.
+        Call this right after our own move is applied on screen.
+        """
+        if self.img is None:
+            return
+        gray = cv2.cvtColor(self.img, cv2.COLOR_BGRA2GRAY)
+        self._prev_thumb = cv2.resize(
+            gray,
+            (self._thumb_size, self._thumb_size),
+            interpolation=cv2.INTER_AREA,
+        )
 
     def set_fen(self, fen):
         if self.board is None:
@@ -84,9 +145,14 @@ class Board:
                     return str(line[1])
 
         t = None if self.clock.tc.depth else self.get_move_time()
+        
+        t0 = time.perf_counter()
         result = self.engine.play(
             self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
         )
+        t1 = time.perf_counter()
+        
+        print(f"[Stockfish] move={(t1 - t0)*1000:.2f} ms")
 
         return str(result.move)
 
@@ -111,7 +177,7 @@ class Board:
             and self.board.piece_at(uci.from_square).piece_type != chess.PAWN
         )
         self.obvious_move = is_capture
-        self.board.push_san(move)
+        self.board.push(uci)
 
         if not self.is_our_turn():
             is_check = self.board.is_check()

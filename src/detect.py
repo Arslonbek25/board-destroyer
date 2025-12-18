@@ -1,4 +1,5 @@
 import os
+import time
 
 import cv2
 import numpy as np
@@ -26,7 +27,13 @@ piece_names = {
 def find_pieces(board):
     img = board.img[:, :, :3]
     pos = np.zeros((8, 8), dtype=np.dtype("U1"))
+    
+    t0 = time.perf_counter()
     res = model.predict(img, verbose=False)[0]
+    t1 = time.perf_counter()
+    
+    print(f"[YOLO] inference={(t1 - t0)*1000:.2f} ms")
+    
     coords = res.boxes.xyxy.numpy().astype(int)[:, 0:2]
     labels = [model.names[int(c)] for c in res.boxes.cls]
     board_height, board_width, _ = img.shape
@@ -34,6 +41,23 @@ def find_pieces(board):
         x, y = coords[i]
         posX = round(8 * x / board_width)
         posY = round(8 * y / board_height)
+        
+        if not (0 <= posX < 8 and 0 <= posY < 8):
+            from telemetry import now_ms, log_jsonl
+            log_jsonl("debug/oob_detections.jsonl", {
+                "ts": now_ms(),
+                "posX": int(posX),
+                "posY": int(posY),
+                "label": int(labels[i]) if i < len(labels) else None,
+                "raw_x": float(x),
+                "raw_y": float(y),
+                "board_w": float(board_width),
+                "board_h": float(board_height),
+                "corners": board.corners.tolist() if hasattr(board, "corners") and board.corners is not None else None,
+            })
+            # Skip this detection instead of crashing
+            continue
+        
         pos[posY, posX] = piece_names[labels[i]]
     if board.color == "b":
         pos = np.flip(pos, axis=(0, 1))

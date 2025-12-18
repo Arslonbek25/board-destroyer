@@ -1,5 +1,6 @@
 import numpy as np
 import pyautogui as pg
+import time
 
 pg.PAUSE = 0
 pg.MINIMUM_DURATION = 0
@@ -30,9 +31,15 @@ def play_move(board, move: str):
 
     move_coords /= board.scale
     x1, y1, x2, y2 = move_coords
+    
+    t0 = time.perf_counter()
     pg.moveTo(x1, y1)
     pg.dragTo(x2, y2, button="left")
     promotion = "qnrb".find(move.lower()[-1])
     if promotion != -1:
         pg.moveTo(x2, y2 + promotion * board.sq_size)
         pg.click()
+    t1 = time.perf_counter()
+    
+    print(f"[UI] play_move={(t1 - t0)*1000:.2f} ms")
+    # time.sleep(0.3)  # small delay to ensure the move is registered

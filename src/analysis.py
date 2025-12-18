@@ -85,6 +85,14 @@ def find_move(board):
             move = f"{indices_to_files[start_file]}{8-start_rank}{indices_to_files[end_file]}{8-end_rank}"
             return move
 
+    from telemetry import now_ms, log_jsonl
+    log_jsonl("debug/find_move_error.jsonl", {
+        "ts": now_ms(),
+        "fen": board.board.fen() if board.board else None,
+        "turn": str(board.turn),
+        "our_turn": bool(board.is_our_turn()),
+        "diff_cnt": int(np.sum(board.prev_pos != board.pos)) if (board.prev_pos is not None and board.pos is not None) else None,
+    })
     return "error"
 
 
