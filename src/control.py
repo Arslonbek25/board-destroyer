@@ -1,6 +1,10 @@
 import numpy as np
 import pyautogui as pg
 
+pg.PAUSE = 0
+pg.MINIMUM_DURATION = 0
+pg.MINIMUM_SLEEP = 0
+
 
 def move_to_pixels(move, board):
     ranks = "abcdefgh"
