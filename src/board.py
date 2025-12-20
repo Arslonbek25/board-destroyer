@@ -149,9 +149,12 @@ class Board:
         t = None if self.clock.tc.depth else self.get_move_time()
         
         t0 = time.perf_counter()
-        result = self.engine.play(
-            self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
-        )
+        try:
+            result = self.engine.play(
+                self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
+            )
+        except chess.engine.EngineTerminatedError:
+            raise
         t1 = time.perf_counter()
         self.last_engine_move_ms = (t1 - t0) * 1000
 
@@ -206,6 +209,14 @@ class Board:
     def _init_engine(self):
         self.engine = chess.engine.SimpleEngine.popen_uci("stockfish")
         self.engine.configure({"Skill Level": self.clock.tc.skill_level})
+
+    def restart_engine(self):
+        try:
+            if getattr(self, "engine", None) is not None:
+                self.engine.quit()
+        except Exception:
+            pass
+        self._init_engine()
 
     def _find_board(self):
         self._capture_screenshot()
