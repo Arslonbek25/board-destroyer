@@ -40,8 +40,21 @@ def find_pieces(board, recorder=None):
     board_height, board_width, _ = img.shape
     for i in range(len(coords)):
         x, y = coords[i]
-        posX = round(8 * x / board_width)
-        posY = round(8 * y / board_height)
+                # floor + clamp to avoid posX/posY becoming 8 due to rounding near edges
+        posX = int(8 * x / board_width)
+        posY = int(8 * y / board_height)
+
+        # clamp to [0..7]
+        if posX < 0:
+            posX = 0
+        elif posX > 7:
+            posX = 7
+
+        if posY < 0:
+            posY = 0
+        elif posY > 7:
+            posY = 7
+
 
         raw_label = labels[i] if i < len(labels) else None
         label_id = None

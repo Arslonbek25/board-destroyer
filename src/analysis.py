@@ -22,8 +22,7 @@ def get_fen(coords, turn):
     return "/".join(fen) + f" {turn}"
 
 
-def find_move(board, recorder=None):
-    before, after = board.prev_pos, board.pos
+def find_move(before, after, recorder=None, context=None):
     indices_to_files = "abcdefgh"
     diff = before != after
     changed_indices = np.argwhere(diff)
@@ -86,15 +85,13 @@ def find_move(board, recorder=None):
             return move
 
     if recorder is not None:
-        recorder.event(
-            "find_move_error",
-            fen=board.board.fen() if board.board else None,
-            turn=str(board.turn),
-            our_turn=bool(board.is_our_turn()),
-            diff_cnt=int(np.sum(board.prev_pos != board.pos))
-            if (board.prev_pos is not None and board.pos is not None)
-            else None,
+        fields = {}
+        if isinstance(context, dict):
+            fields.update(context)
+        fields["diff_cnt"] = (
+            int(np.sum(before != after)) if (before is not None and after is not None) else None
         )
+        recorder.event("find_move_error", **fields)
     return "error"
 
 

@@ -244,7 +244,16 @@ def run(config, stop_game=None):
                     if not board.is_our_turn():
                         board.end_opp_move_time()
                         if not is_first_run:
-                            move_made = analysis.find_move(board, recorder=recorder)
+                            move_made = analysis.find_move(
+                                board.prev_pos,
+                                board.pos,
+                                recorder=recorder,
+                                context={
+                                    "fen": board.board.fen() if board.board else None,
+                                    "turn": str(board.turn),
+                                    "our_turn": bool(board.is_our_turn()),
+                                },
+                            )
                             if move_made == "error":
                                 opp_fail_streak += 1
                                 find_move_error_count += 1
