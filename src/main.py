@@ -19,7 +19,7 @@ def run(config, stop_game=None):
 
     cfg = DebugConfig.from_config(config)
     cfg.diff_threshold = DIFF_THRESHOLD
-    cfg.thumb_size = 160
+    cfg.thumb_size = 256
     recorder = DebugRecorder(cfg) if cfg.enabled else NullRecorder()
 
     EXIT_REASON = "unknown"

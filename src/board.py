@@ -32,7 +32,7 @@ class Board:
         self.obvious_move = False
         self.opp_move_start_time = time.time()
         self._prev_thumb = None
-        self._thumb_size = 160
+        self._thumb_size = 256
         self._last_diff_score = 0.0
         self.last_capture_ms = 0.0
         self.last_resize_ms = 0.0

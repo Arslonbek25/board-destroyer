@@ -22,6 +22,9 @@ piece_names = {
     "black-knight": "n",
     "black-pawn": "p",
 }
+piece_names_by_id = {
+    int(k): piece_names.get(v, v) for k, v in getattr(model, "names", {}).items()
+}
 
 
 def find_pieces(board, recorder=None):
@@ -32,14 +35,43 @@ def find_pieces(board, recorder=None):
     res = model.predict(img, verbose=False)[0]
     t1 = time.perf_counter()
     # timing handled by caller for metrics
-    
     coords = res.boxes.xyxy.numpy().astype(int)[:, 0:2]
-    labels = [model.names[int(c)] for c in res.boxes.cls]
+    labels = res.boxes.cls.tolist() if hasattr(res.boxes.cls, "tolist") else list(res.boxes.cls)
     board_height, board_width, _ = img.shape
     for i in range(len(coords)):
         x, y = coords[i]
         posX = round(8 * x / board_width)
         posY = round(8 * y / board_height)
+
+        raw_label = labels[i] if i < len(labels) else None
+        label_id = None
+        label_name = None
+
+        if isinstance(raw_label, (int,)):
+            label_id = int(raw_label)
+        elif isinstance(raw_label, str):
+            s = raw_label.strip()
+            if s.isdigit():
+                label_id = int(s)
+            else:
+                label_name = s
+        else:
+            try:
+                label_id = int(raw_label)
+            except Exception:
+                label_name = str(raw_label)
+
+        if label_id is not None and label_name is None:
+            try:
+                label_name = model.names.get(label_id) if isinstance(model.names, dict) else None
+            except Exception:
+                label_name = None
+
+        piece = None
+        if label_id is not None:
+            piece = piece_names_by_id.get(label_id)
+        elif label_name is not None:
+            piece = piece_names.get(label_name, label_name)
         
         if not (0 <= posX < 8 and 0 <= posY < 8):
             if recorder is not None:
@@ -47,7 +79,9 @@ def find_pieces(board, recorder=None):
                     "oob_detection",
                     posX=int(posX),
                     posY=int(posY),
-                    label=int(labels[i]) if i < len(labels) else None,
+                    label_id=label_id,
+                    label_name=label_name,
+                    raw_label=str(raw_label),
                     raw_x=float(x),
                     raw_y=float(y),
                     board_w=float(board_width),
@@ -57,8 +91,11 @@ def find_pieces(board, recorder=None):
                     else None,
                 )
             continue
-        
-        pos[posY, posX] = piece_names[labels[i]]
+
+        if piece is None:
+            continue
+
+        pos[posY, posX] = piece
     if board.color == "b":
         pos = np.flip(pos, axis=(0, 1))
     return pos
