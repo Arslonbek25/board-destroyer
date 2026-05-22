@@ -9,6 +9,7 @@ import numpy as np
 import pyautogui as pg
 
 from clock import Clock
+from config import Color
 from detect import getBoardCorners
 
 
@@ -162,7 +163,7 @@ class Board:
 
     def switch_turn(self, is_first_run=False):
         if not is_first_run:
-            self.turn = "b" if self.turn == "w" else "w"
+            self.turn = Color.BLACK if self.turn == Color.WHITE else Color.WHITE
         self.prev_pos = np.copy(self.pos)
 
     def game_over(self):

@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
+from config import Color
+
 model_path = os.path.join(os.getcwd(), "YOLO_model", "weights", "best.pt")
 model = YOLO(model_path)
 
@@ -109,7 +111,7 @@ def find_pieces(board, recorder=None):
             continue
 
         pos[posY, posX] = piece
-    if board.color == "b":
+    if board.color == Color.BLACK:
         pos = np.flip(pos, axis=(0, 1))
     return pos
 

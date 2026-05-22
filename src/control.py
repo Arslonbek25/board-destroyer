@@ -2,6 +2,8 @@ import numpy as np
 import pyautogui as pg
 import time
 
+from config import Color
+
 pg.PAUSE = 0
 pg.MINIMUM_DURATION = 0
 pg.MINIMUM_SLEEP = 0
@@ -11,7 +13,7 @@ def move_to_pixels(move, board):
     ranks = "abcdefgh"
     files = "12345678"
 
-    if board.color == "b":
+    if board.color == Color.BLACK:
         ranks = ranks[::-1]
         files = files[::-1]
 

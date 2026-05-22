@@ -2,14 +2,13 @@ import threading
 
 from nicegui import app, ui
 
-from config import Config
+from config import Color, Config
 from main import run
 
 
 class BoardDestroyer:
     def __init__(self):
-        self.config = Config()
-        self.config.load()
+        self.config = Config.load()
         self.max_time_slider = None
         self.setup_ui()
 
@@ -48,8 +47,8 @@ class BoardDestroyer:
                 .bind_value(
                     self.config,
                     "color",
-                    forward=lambda x: x[0].lower(),
-                    backward=lambda x: "White" if x == "w" else "Black",
+                    forward=lambda x: Color(x[0].lower()),
+                    backward=lambda x: "White" if x == Color.WHITE else "Black",
                 )
             )
 
@@ -141,7 +140,7 @@ class BoardDestroyer:
             self.skill_level_slider.value = self.config.time_control.skill_level
 
     def reset(self):
-        self.config.load()
+        self.config = Config.load()
         self.on_tc_change()
 
     def on_min_time_change(self, e):

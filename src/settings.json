@@ -1,5 +1,5 @@
 {
-    "debug": true,
+    "debug": false,
     "time_controls": {
         "rapid": {
             "min_time": 0.1,
