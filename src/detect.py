@@ -1,5 +1,4 @@
 import os
-import time
 
 import cv2
 import numpy as np
@@ -7,8 +6,6 @@ from ultralytics import YOLO
 
 from config import Color
 
-model_path = os.path.join(os.getcwd(), "YOLO_model", "weights", "best.pt")
-model = YOLO(model_path)
 
 piece_names = {
     "white-king": "K",
@@ -24,29 +21,37 @@ piece_names = {
     "black-knight": "n",
     "black-pawn": "p",
 }
-piece_names_by_id = {
-    int(k): piece_names.get(v, v) for k, v in getattr(model, "names", {}).items()
-}
+
+_model = None
+_piece_names_by_id: dict | None = None
+
+
+def _get_model() -> tuple:
+    global _model, _piece_names_by_id
+    if _model is None:
+        model_path = os.path.join(os.getcwd(), "YOLO_model", "weights", "best.pt")
+        _model = YOLO(model_path)
+        names = getattr(_model, "names", {})
+        _piece_names_by_id = {
+            int(k): piece_names.get(v, v) for k, v in names.items()
+        }
+    return _model, _piece_names_by_id
 
 
 def find_pieces(board):
+    model, piece_names_by_id = _get_model()
     img = board.img[:, :, :3]
     pos = np.zeros((8, 8), dtype=np.dtype("U1"))
-    
-    t0 = time.perf_counter()
+
     res = model.predict(img, verbose=False)[0]
-    t1 = time.perf_counter()
-    # timing handled by caller for metrics
     coords = res.boxes.xyxy.numpy().astype(int)[:, 0:2]
     labels = res.boxes.cls.tolist() if hasattr(res.boxes.cls, "tolist") else list(res.boxes.cls)
     board_height, board_width, _ = img.shape
     for i in range(len(coords)):
         x, y = coords[i]
-                # floor + clamp to avoid posX/posY becoming 8 due to rounding near edges
         posX = int(8 * x / board_width)
         posY = int(8 * y / board_height)
 
-        # clamp to [0..7]
         if posX < 0:
             posX = 0
         elif posX > 7:
@@ -56,7 +61,6 @@ def find_pieces(board):
             posY = 0
         elif posY > 7:
             posY = 7
-
 
         raw_label = labels[i] if i < len(labels) else None
         label_id = None
@@ -87,7 +91,7 @@ def find_pieces(board):
             piece = piece_names_by_id.get(label_id)
         elif label_name is not None:
             piece = piece_names.get(label_name, label_name)
-        
+
         if piece is None:
             continue
 
@@ -132,7 +136,6 @@ def getBoardCorners(board):
         complex_points = [x + y * 1j for x, y in points]
 
         if not is_square(complex_points):
-            raise
+            raise ValueError("detected board contour is not square")
         return points
-    else:
-        raise
+    raise ValueError("could not detect a 4-corner board contour")

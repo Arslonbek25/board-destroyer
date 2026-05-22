@@ -1,5 +1,4 @@
 import time
-from datetime import datetime
 
 import chess
 import cv2
@@ -30,25 +29,11 @@ class BoardSession:
         self.opp_move_start_time = time.time()
         self._prev_thumb = None
         self._thumb_size = 256
-        self._last_diff_score = 0.0
-        self.last_capture_ms = 0.0
-        self.last_resize_ms = 0.0
-        self.last_update_ms = 0.0
-        self.last_engine_move_ms = 0.0
 
     def update(self):
         self.last_update = time.time()
-        
-        t0 = time.perf_counter()
         self._capture_screenshot(cropped=True)
-        t1 = time.perf_counter()
-        
         self._resize()
-        t2 = time.perf_counter()
-        
-        self.last_capture_ms = (t1 - t0) * 1000
-        self.last_resize_ms = (t2 - t1) * 1000
-        self.last_update_ms = (t2 - t0) * 1000
 
     def board_changed_fast(self, threshold: float = 2.2) -> bool:
         """
@@ -58,7 +43,6 @@ class BoardSession:
         """
         img = self.img
         if img is None:
-            self._last_diff_score = 999.0
             return True
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
@@ -70,12 +54,10 @@ class BoardSession:
 
         if self._prev_thumb is None:
             self._prev_thumb = thumb
-            self._last_diff_score = 999.0
             return True
 
         diff = cv2.absdiff(thumb, self._prev_thumb)
         score = float(diff.mean())
-        self._last_diff_score = score
 
         # IMPORTANT: Only advance baseline when the scene is stable.
         if score < threshold:
@@ -99,19 +81,12 @@ class BoardSession:
 
     def set_fen(self, fen):
         if self.board is None:
-            self.board = chess.BoardSession()
+            self.board = chess.Board()
             self.board.set_fen(fen)
             try:
                 self.board.set_castling_fen("KQkq")
             except ValueError:
                 pass
-
-    def save_screenshot(self, filename=None):
-        if not filename:
-            now = datetime.now()
-            id = now.strftime("%Y%m%d_%H%M%S_%f")
-            filename = f"screenshots/screenshot{id}.png"
-        cv2.imwrite(filename, self.img)
 
     def get_move_time(self):
         if self.obvious_move:
@@ -164,16 +139,14 @@ class BoardSession:
                 )
                 self.obvious_move |= is_threat
 
-    def focus(self):
-        pg.click(self.corners[0, 0], self.corners[0, 1])
-
     def _init_board(self):
-        while True:
+        for _ in range(30):
             try:
                 self._find_board()
-                break
-            except:
-                pass
+                return
+            except Exception:
+                time.sleep(0.1)
+        raise RuntimeError("could not find chess board on screen after 30 attempts")
 
     def _find_board(self):
         self._capture_screenshot()

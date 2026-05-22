@@ -25,6 +25,10 @@ def move_to_pixels(move, board):
     return coords
 
 
+def focus(board) -> None:
+    pg.click(board.corners[0, 0], board.corners[0, 1])
+
+
 def play_move(board, move: str):
     move_coords = move_to_pixels(move, board)
 

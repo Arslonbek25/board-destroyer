@@ -1,5 +1,6 @@
 import time
 from enum import Enum, auto
+from typing import Callable
 
 import chess
 import numpy as np
@@ -8,6 +9,7 @@ import analysis
 import control
 import detect
 from board_session import BoardSession
+from config import Config
 from engine import Engine
 
 
@@ -24,15 +26,15 @@ class State(Enum):
     OUR_TURN = auto()
 
 
-def _attach(board: BoardSession) -> None:
+def attach(board: BoardSession) -> None:
     board.update()
     board.pos = detect.find_pieces(board)
     board.set_fen(analysis.get_fen(board.pos, board.turn))
     board.prev_pos = board.pos.copy()
-    board.focus()
+    control.focus(board)
 
 
-def _parse_opp_move(prev_pos, pos, chess_board) -> chess.Move | None:
+def parse_opp_move(prev_pos, pos, chess_board) -> chess.Move | None:
     raw = analysis.find_move(prev_pos, pos)
     if raw == "error":
         return None
@@ -45,7 +47,7 @@ def _parse_opp_move(prev_pos, pos, chess_board) -> chess.Move | None:
     return mv
 
 
-def _play_our_move(board: BoardSession, engine: Engine, config) -> None:
+def play_our_move(board: BoardSession, engine: Engine, config: Config) -> None:
     best_move = None
     if board.board.move_stack:
         best_move = engine.try_anticipated(board.board.move_stack[-1])
@@ -76,19 +78,19 @@ def _play_our_move(board: BoardSession, engine: Engine, config) -> None:
     engine.anticipate(board.board, config.lines)
 
 
-def _play_session(config) -> tuple[BoardSession, bool]:
+def play_session(config: Config) -> tuple[BoardSession, bool]:
     """Run one attach-to-restart session. Returns (board, restart_requested)."""
     board = BoardSession(config)
     engine = Engine(config.time_control.skill_level)
     try:
-        _attach(board)
+        attach(board)
 
         state = State.OUR_TURN if board.is_our_turn() else State.AWAITING_OPP
         opp_fail_streak = 0
 
         while config.game_running and not board.game_over():
             if state is State.OUR_TURN:
-                _play_our_move(board, engine, config)
+                play_our_move(board, engine, config)
                 state = State.AWAITING_OPP
                 continue
 
@@ -102,7 +104,7 @@ def _play_session(config) -> tuple[BoardSession, bool]:
                 continue
 
             board.end_opp_move_time()
-            mv = _parse_opp_move(board.prev_pos, board.pos, board.board)
+            mv = parse_opp_move(board.prev_pos, board.pos, board.board)
             if mv is None:
                 opp_fail_streak += 1
                 if opp_fail_streak >= OPP_FAIL_LIMIT:
@@ -120,15 +122,13 @@ def _play_session(config) -> tuple[BoardSession, bool]:
         engine.quit()
 
 
-def run(config, stop_game=None):
-    board = None
+def run(config: Config, stop_game: Callable[[], None] | None = None) -> None:
     restart_count = 0
-    exit_reason = "stopped"
 
     try:
         while config.game_running and restart_count <= MAX_RESTARTS:
             try:
-                board, restart = _play_session(config)
+                _, restart = play_session(config)
             except Exception:
                 restart_count += 1
                 continue
@@ -137,12 +137,7 @@ def run(config, stop_game=None):
                 restart_count += 1
                 continue
 
-            exit_reason = "game_over" if board.game_over() else "stopped"
             break
-
-        if restart_count > MAX_RESTARTS:
-            exit_reason = "too_many_restarts"
     finally:
-        print(f"Game stopped | reason={exit_reason}")
         if callable(stop_game):
             stop_game()
