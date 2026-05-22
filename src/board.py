@@ -2,7 +2,6 @@ import time
 from datetime import datetime
 
 import chess
-import chess.engine
 import cv2
 import mss
 import numpy as np
@@ -22,14 +21,11 @@ class Board:
             self.color = config.color
             self.turn = config.color
             self.clock = Clock(config)
-            self._init_engine()
             self.opp_move_time = self.config.time_control.min_time
         self.sct = mss.mss()
         self._init_board()
         self.prev_pos = None
         self.board = None
-        self.calc_thread = None
-        self.top_lines = []
         self.obvious_move = False
         self.opp_move_start_time = time.time()
         self._prev_thumb = None
@@ -133,34 +129,6 @@ class Board:
     def start_opp_move_time(self):
         self.opp_move_start_time = time.time()
 
-    def analyze_board(self):
-        lines = self.engine.analyse(
-            self.board, chess.engine.Limit(depth=12), multipv=self.config.lines
-        )
-        self.top_lines = [line.get("pv") for line in lines]
-
-    def get_best_move(self):
-        if self.calc_thread:
-            last_move = self.board.move_stack[-1]
-            self.calc_thread.join()
-            for line in self.top_lines:
-                if line[0] == last_move:
-                    return str(line[1])
-
-        t = None if self.clock.tc.depth else self.get_move_time()
-        
-        t0 = time.perf_counter()
-        try:
-            result = self.engine.play(
-                self.board, chess.engine.Limit(time=t, depth=self.clock.tc.depth)
-            )
-        except chess.engine.EngineTerminatedError:
-            raise
-        t1 = time.perf_counter()
-        self.last_engine_move_ms = (t1 - t0) * 1000
-
-        return str(result.move)
-
     def switch_turn(self, is_first_run=False):
         if not is_first_run:
             self.turn = Color.BLACK if self.turn == Color.WHITE else Color.WHITE
@@ -206,18 +174,6 @@ class Board:
                 break
             except:
                 pass
-
-    def _init_engine(self):
-        self.engine = chess.engine.SimpleEngine.popen_uci("stockfish")
-        self.engine.configure({"Skill Level": self.clock.tc.skill_level})
-
-    def restart_engine(self):
-        try:
-            if getattr(self, "engine", None) is not None:
-                self.engine.quit()
-        except Exception:
-            pass
-        self._init_engine()
 
     def _find_board(self):
         self._capture_screenshot()
