@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from analysis import find_move
+from position import find_move
 
 
 def empty_pos():

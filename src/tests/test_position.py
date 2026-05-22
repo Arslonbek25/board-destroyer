@@ -6,7 +6,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from analysis import get_board_position, get_fen
+from position import get_board_position, get_fen
 
 
 def empty_pos():

@@ -8,7 +8,7 @@ import pyautogui as pg
 
 from clock import Clock
 from config import Color
-from detect import getBoardCorners
+from vision import getBoardCorners
 
 
 class BoardSession:

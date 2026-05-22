@@ -5,9 +5,9 @@ from typing import Callable
 import chess
 import numpy as np
 
-import analysis
 import control
-import detect
+import position
+import vision
 from board_session import BoardSession
 from config import Config
 from engine import Engine
@@ -28,14 +28,14 @@ class State(Enum):
 
 def attach(board: BoardSession) -> None:
     board.update()
-    board.pos = detect.find_pieces(board)
-    board.set_fen(analysis.get_fen(board.pos, board.turn))
+    board.pos = vision.find_pieces(board)
+    board.set_fen(position.get_fen(board.pos, board.turn))
     board.prev_pos = board.pos.copy()
     control.focus(board)
 
 
 def parse_opp_move(prev_pos, pos, chess_board) -> chess.Move | None:
-    raw = analysis.find_move(prev_pos, pos)
+    raw = position.find_move(prev_pos, pos)
     if raw == "error":
         return None
     try:
@@ -61,10 +61,10 @@ def play_our_move(board: BoardSession, engine: Engine, config: Config) -> None:
     board.push_move(best_move)
     control.play_move(board, best_move)
 
-    expected_pos = analysis.get_board_position(board.board)
+    expected_pos = position.get_board_position(board.board)
     for _ in range(RENDER_RETRIES):
         board.update()
-        board.pos = detect.find_pieces(board)
+        board.pos = vision.find_pieces(board)
         if np.array_equal(board.pos, expected_pos):
             break
         time.sleep(RENDER_RETRY_SLEEP)
@@ -99,7 +99,7 @@ def play_session(config: Config) -> tuple[BoardSession, bool]:
                 time.sleep(IDLE_SLEEP)
                 continue
 
-            board.pos = detect.find_pieces(board)
+            board.pos = vision.find_pieces(board)
             if not board.pos_changed():
                 continue
 
