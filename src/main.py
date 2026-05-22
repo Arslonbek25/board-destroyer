@@ -1,5 +1,6 @@
 import threading
 import time
+from enum import Enum, auto
 
 import chess
 import numpy as np
@@ -16,6 +17,11 @@ OPP_FAIL_LIMIT = 3
 RENDER_RETRIES = 4
 RENDER_RETRY_SLEEP = 0.03
 IDLE_SLEEP = 0.02
+
+
+class State(Enum):
+    AWAITING_OPP = auto()
+    OUR_TURN = auto()
 
 
 def _attach(board: Board) -> None:
@@ -68,11 +74,15 @@ def _play_session(config) -> tuple[Board, bool]:
     board = Board(config)
     _attach(board)
 
-    if board.is_our_turn():
-        _play_our_move(board, config)
-
+    state = State.OUR_TURN if board.is_our_turn() else State.AWAITING_OPP
     opp_fail_streak = 0
+
     while config.game_running and not board.game_over():
+        if state is State.OUR_TURN:
+            _play_our_move(board, config)
+            state = State.AWAITING_OPP
+            continue
+
         board.update()
         if not board.board_changed_fast(threshold=DIFF_THRESHOLD):
             time.sleep(IDLE_SLEEP)
@@ -82,21 +92,19 @@ def _play_session(config) -> tuple[Board, bool]:
         if not board.pos_changed():
             continue
 
-        if not board.is_our_turn():
-            board.end_opp_move_time()
-            mv = _parse_opp_move(board.prev_pos, board.pos, board.board)
-            if mv is None:
-                opp_fail_streak += 1
-                if opp_fail_streak >= OPP_FAIL_LIMIT:
-                    return board, True
-                time.sleep(IDLE_SLEEP)
-                continue
-            opp_fail_streak = 0
-            board.push_move(mv.uci())
-            board.switch_turn()
+        board.end_opp_move_time()
+        mv = _parse_opp_move(board.prev_pos, board.pos, board.board)
+        if mv is None:
+            opp_fail_streak += 1
+            if opp_fail_streak >= OPP_FAIL_LIMIT:
+                return board, True
+            time.sleep(IDLE_SLEEP)
+            continue
 
-        if board.is_our_turn():
-            _play_our_move(board, config)
+        opp_fail_streak = 0
+        board.push_move(mv.uci())
+        board.switch_turn()
+        state = State.OUR_TURN
 
     return board, False
 
