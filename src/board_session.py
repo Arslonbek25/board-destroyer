@@ -12,7 +12,7 @@ from config import Color
 from detect import getBoardCorners
 
 
-class Board:
+class BoardSession:
     IMG_SIZE = 640
 
     def __init__(self, config=None, util=False):
@@ -99,7 +99,7 @@ class Board:
 
     def set_fen(self, fen):
         if self.board is None:
-            self.board = chess.Board()
+            self.board = chess.BoardSession()
             self.board.set_fen(fen)
             try:
                 self.board.set_castling_fen("KQkq")
@@ -209,7 +209,7 @@ class Board:
         ]
 
     def _resize(self):
-        scale = Board.IMG_SIZE / self.img.shape[0]
+        scale = BoardSession.IMG_SIZE / self.img.shape[0]
         self.img = cv2.resize(
             self.img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR
         )

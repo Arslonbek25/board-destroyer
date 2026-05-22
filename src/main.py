@@ -7,7 +7,7 @@ import numpy as np
 import analysis
 import control
 import detect
-from board import Board
+from board_session import BoardSession
 from engine import Engine
 
 
@@ -24,7 +24,7 @@ class State(Enum):
     OUR_TURN = auto()
 
 
-def _attach(board: Board) -> None:
+def _attach(board: BoardSession) -> None:
     board.update()
     board.pos = detect.find_pieces(board)
     board.set_fen(analysis.get_fen(board.pos, board.turn))
@@ -45,7 +45,7 @@ def _parse_opp_move(prev_pos, pos, chess_board) -> chess.Move | None:
     return mv
 
 
-def _play_our_move(board: Board, engine: Engine, config) -> None:
+def _play_our_move(board: BoardSession, engine: Engine, config) -> None:
     best_move = None
     if board.board.move_stack:
         best_move = engine.try_anticipated(board.board.move_stack[-1])
@@ -76,9 +76,9 @@ def _play_our_move(board: Board, engine: Engine, config) -> None:
     engine.anticipate(board.board, config.lines)
 
 
-def _play_session(config) -> tuple[Board, bool]:
+def _play_session(config) -> tuple[BoardSession, bool]:
     """Run one attach-to-restart session. Returns (board, restart_requested)."""
-    board = Board(config)
+    board = BoardSession(config)
     engine = Engine(config.time_control.skill_level)
     try:
         _attach(board)
