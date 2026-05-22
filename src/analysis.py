@@ -22,7 +22,7 @@ def get_fen(coords, turn):
     return "/".join(fen) + f" {turn}"
 
 
-def find_move(before, after, recorder=None, context=None):
+def find_move(before, after):
     indices_to_files = "abcdefgh"
     diff = before != after
     changed_indices = np.argwhere(diff)
@@ -84,14 +84,6 @@ def find_move(before, after, recorder=None, context=None):
             move = f"{indices_to_files[start_file]}{8-start_rank}{indices_to_files[end_file]}{8-end_rank}"
             return move
 
-    if recorder is not None:
-        fields = {}
-        if isinstance(context, dict):
-            fields.update(context)
-        fields["diff_cnt"] = (
-            int(np.sum(before != after)) if (before is not None and after is not None) else None
-        )
-        recorder.event("find_move_error", **fields)
     return "error"
 
 

@@ -21,7 +21,6 @@ class TimeControl:
 
 @dataclass
 class Config:
-    debug: bool
     color: Color
     time_control_name: str
     time_controls: dict[str, TimeControl]
@@ -62,7 +61,6 @@ class Config:
 
     def save(self, path: str = DEFAULT_PATH) -> None:
         payload = {
-            "debug": self.debug,
             "color": self.color.value,
             "time_control_name": self.time_control_name,
             "time_controls": {

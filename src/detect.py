@@ -29,7 +29,7 @@ piece_names_by_id = {
 }
 
 
-def find_pieces(board, recorder=None):
+def find_pieces(board):
     img = board.img[:, :, :3]
     pos = np.zeros((8, 8), dtype=np.dtype("U1"))
     
@@ -88,25 +88,6 @@ def find_pieces(board, recorder=None):
         elif label_name is not None:
             piece = piece_names.get(label_name, label_name)
         
-        if not (0 <= posX < 8 and 0 <= posY < 8):
-            if recorder is not None:
-                recorder.event(
-                    "oob_detection",
-                    posX=int(posX),
-                    posY=int(posY),
-                    label_id=label_id,
-                    label_name=label_name,
-                    raw_label=str(raw_label),
-                    raw_x=float(x),
-                    raw_y=float(y),
-                    board_w=float(board_width),
-                    board_h=float(board_height),
-                    corners=board.corners.tolist()
-                    if hasattr(board, "corners") and board.corners is not None
-                    else None,
-                )
-            continue
-
         if piece is None:
             continue
 
