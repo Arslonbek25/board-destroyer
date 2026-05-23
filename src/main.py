@@ -29,7 +29,7 @@ class State(Enum):
 def attach(board: BoardSession) -> None:
     board.update()
     board.pos = vision.find_pieces(board)
-    board.set_fen(position.get_fen(board.pos, board.turn))
+    board.set_fen(position.get_fen(board.pos, board.color))
     board.prev_pos = board.pos.copy()
     control.focus(board)
 
@@ -59,7 +59,7 @@ def play_our_move(board: BoardSession, engine: Engine, config: Config) -> bool:
             board.board, time=t, depth=board.clock.tc.depth
         )
 
-    board.push_move(best_move)
+    board.push_our_move(best_move)
     control.play_move(board, best_move)
 
     expected_pos = position.get_board_position(board.board)
@@ -74,7 +74,7 @@ def play_our_move(board: BoardSession, engine: Engine, config: Config) -> bool:
 
     board.sync_diff_baseline()
     board.start_opp_move_time()
-    board.switch_turn()
+    board.commit_pos_baseline()
 
     engine.anticipate(board.board, config.lines)
     return False
@@ -116,8 +116,8 @@ def play_session(config: Config) -> bool:
                 continue
 
             opp_fail_streak = 0
-            board.push_move(mv.uci())
-            board.switch_turn()
+            board.push_opp_move(mv.uci())
+            board.commit_pos_baseline()
             state = State.OUR_TURN
 
         return False

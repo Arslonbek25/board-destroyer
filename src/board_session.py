@@ -16,13 +16,12 @@ class BoardSession:
 
     def __init__(self, config):
         self.color = config.color
-        self.turn = config.color
         self.clock = Clock(config)
         self.opp_move_time = config.time_control.min_time
         self.sct = mss.mss()
         self._init_board()
         self.prev_pos = None
-        self.board = None
+        self.board: chess.Board | None = None
         self.obvious_move = False
         self.opp_move_start_time = time.time()
         self._prev_thumb = None
@@ -102,8 +101,8 @@ class BoardSession:
     def start_opp_move_time(self):
         self.opp_move_start_time = time.time()
 
-    def switch_turn(self):
-        self.turn = Color.BLACK if self.turn == Color.WHITE else Color.WHITE
+    def commit_pos_baseline(self):
+        """Snapshot the current YOLO position as the next diff baseline."""
         self.prev_pos = np.copy(self.pos)
 
     def game_over(self):
@@ -112,29 +111,40 @@ class BoardSession:
     def pos_changed(self):
         return not np.array_equal(self.prev_pos, self.pos)
 
-    def is_our_turn(self):
-        return self.color == self.turn
+    def is_our_turn(self) -> bool:
+        # Before attach, chess.Board doesn't exist yet — assume our turn at session start.
+        if self.board is None:
+            return True
+        we_are_white = self.color == Color.WHITE
+        return self.board.turn == we_are_white
 
-    def push_move(self, move):
-        uci = chess.Move.from_uci(move)
-        is_capture = (
-            self.board.is_capture(uci)
-            and self.board.piece_at(uci.from_square).piece_type != chess.PAWN
-        )
+    def push_our_move(self, uci: str) -> None:
+        mv, is_capture = self._push(uci)
         self.obvious_move = is_capture
-        self.board.push(uci)
 
-        if not self.is_our_turn():
-            is_check = self.board.is_check()
-            self.obvious_move |= is_check
+    def push_opp_move(self, uci: str) -> None:
+        mv, is_capture = self._push(uci)
+        # The "obvious" heuristic for opp moves: capture / check / pawn-creates-threat
+        # → respond fast because the move forces us. (See clock.get_move_time.)
+        self.obvious_move = is_capture or self.board.is_check() or self._is_pawn_threat(mv)
 
-            if self.board.piece_at(uci.to_square).piece_type == chess.PAWN:
-                is_threat = any(
-                    self.board.piece_at(sq)
-                    and self.board.piece_at(sq).color == self.board.turn
-                    for sq in self.board.attacks(uci.to_square)
-                )
-                self.obvious_move |= is_threat
+    def _push(self, uci: str) -> tuple[chess.Move, bool]:
+        mv = chess.Move.from_uci(uci)
+        is_capture = (
+            self.board.is_capture(mv)
+            and self.board.piece_at(mv.from_square).piece_type != chess.PAWN
+        )
+        self.board.push(mv)
+        return mv, is_capture
+
+    def _is_pawn_threat(self, mv: chess.Move) -> bool:
+        landed = self.board.piece_at(mv.to_square)
+        if landed is None or landed.piece_type != chess.PAWN:
+            return False
+        return any(
+            self.board.piece_at(sq) and self.board.piece_at(sq).color == self.board.turn
+            for sq in self.board.attacks(mv.to_square)
+        )
 
     def _init_board(self):
         for _ in range(30):
