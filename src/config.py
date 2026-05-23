@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass, fields
+from dataclasses import asdict, dataclass, fields
 from enum import Enum
 
 
@@ -60,19 +60,8 @@ class Config:
         return cfg
 
     def save(self, path: str = DEFAULT_PATH) -> None:
-        payload = {
-            "color": self.color.value,
-            "time_control_name": self.time_control_name,
-            "time_controls": {
-                name: tc.__dict__ for name, tc in self.time_controls.items()
-            },
-            "game_running": self.game_running,
-            "time_advantage": self.time_advantage,
-            "lines": self.lines,
-            "randomness_factor": self.randomness_factor,
-            "k": self.k,
-            "phase_factors": self.phase_factors,
-        }
+        payload = asdict(self)
+        payload["color"] = self.color.value  # Color → "w"/"b" rather than enum repr
         with open(path, "w") as file:
             json.dump(payload, file, indent=4)
 

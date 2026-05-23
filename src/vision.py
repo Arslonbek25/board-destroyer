@@ -63,6 +63,9 @@ def find_pieces(board):
     return pos
 
 
+MIN_BOARD_AREA_PX = 1_000_000  # smallest contour area we accept as a chess board
+
+
 def is_square(A, threshold=10):
     center = sum(A) / 4.0
     rotated_points = [(A[0] - center) * (1j**i) + center for i in range(4)]
@@ -93,7 +96,7 @@ def getBoardCorners(board):
     epsilon = 0.05 * cv2.arcLength(largest_contour, True)
     corners = cv2.approxPolyDP(largest_contour, epsilon, True)
 
-    if len(corners) == 4 and largest_area > 1000000:
+    if len(corners) == 4 and largest_area > MIN_BOARD_AREA_PX:
         points = corners.reshape(corners.shape[0], 2)
         complex_points = [x + y * 1j for x, y in points]
 
