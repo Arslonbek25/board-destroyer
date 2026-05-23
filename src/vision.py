@@ -1,10 +1,13 @@
-import os
+from pathlib import Path
 
 import cv2
 import numpy as np
 from ultralytics import YOLO
 
 from config import Color
+
+
+_MODEL_PATH = Path(__file__).resolve().parent.parent / "YOLO_model" / "weights" / "best.pt"
 
 
 piece_names = {
@@ -29,8 +32,7 @@ _piece_names_by_id: dict | None = None
 def _get_model() -> tuple:
     global _model, _piece_names_by_id
     if _model is None:
-        model_path = os.path.join(os.getcwd(), "YOLO_model", "weights", "best.pt")
-        _model = YOLO(model_path)
+        _model = YOLO(str(_MODEL_PATH))
         names = getattr(_model, "names", {})
         _piece_names_by_id = {
             int(k): piece_names.get(v, v) for k, v in names.items()

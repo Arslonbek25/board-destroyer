@@ -136,6 +136,10 @@ def run(config: Config, stop_game: Callable[[], None] | None = None) -> None:
                 restart = play_session(config)
             except Exception:
                 restart_count += 1
+                if restart_count > MAX_RESTARTS:
+                    # Out of restart slots — surface the underlying error
+                    # rather than exiting silently.
+                    raise
                 continue
 
             if restart:
