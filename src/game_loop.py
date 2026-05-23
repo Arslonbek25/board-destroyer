@@ -30,7 +30,7 @@ def attach(board: BoardSession) -> None:
     board.update()
     board.pos = vision.find_pieces(board)
     board.set_fen(position.get_fen(board.pos, board.color))
-    board.prev_pos = board.pos.copy()
+    board.commit_pos_baseline()
     control.focus(board)
 
 
@@ -47,39 +47,33 @@ def parse_opp_move(prev_pos, pos, chess_board) -> chess.Move | None:
     return mv
 
 
-def play_our_move(board: BoardSession, engine: Engine, config: Config) -> bool:
-    """Play our move. Returns True if render verification failed (restart)."""
-    best_move = None
+def decide_our_move(board: BoardSession, engine: Engine) -> str:
+    """Pick our move — anticipation hit if available, else a fresh engine call."""
     if board.board.move_stack:
-        best_move = engine.try_anticipated(
+        anticipated = engine.try_anticipated(
             board.board.move_stack[-1], board=board.board
         )
+        if anticipated is not None:
+            return anticipated
+    t = None if board.clock.tc.depth else board.get_move_time()
+    return engine.best_move(board.board, time=t, depth=board.clock.tc.depth)
 
-    if best_move is None:
-        t = None if board.clock.tc.depth else board.get_move_time()
-        best_move = engine.best_move(
-            board.board, time=t, depth=board.clock.tc.depth
-        )
 
-    board.push_our_move(best_move)
-    control.play_move(board, best_move)
+def execute_our_move(board: BoardSession, uci: str) -> bool:
+    """Drag the move on screen and verify the screen reflects it.
+    Returns True if verification failed → caller should restart."""
+    board.push_our_move(uci)
+    control.play_move(board, uci)
 
     expected_pos = position.get_board_position(board.board)
     for _ in range(RENDER_RETRIES):
         board.update()
         board.pos = vision.find_pieces(board)
         if np.array_equal(board.pos, expected_pos):
-            break
+            board.complete_our_move()
+            return False
         time.sleep(RENDER_RETRY_SLEEP)
-    if not np.array_equal(board.pos, expected_pos):
-        return True
-
-    board.sync_diff_baseline()
-    board.start_opp_move_time()
-    board.commit_pos_baseline()
-
-    engine.anticipate(board.board, config.lines)
-    return False
+    return True
 
 
 def play_session(config: Config) -> bool:
@@ -94,8 +88,10 @@ def play_session(config: Config) -> bool:
 
         while config.game_running and not board.game_over():
             if state is State.OUR_TURN:
-                if play_our_move(board, engine, config):
+                uci = decide_our_move(board, engine)
+                if execute_our_move(board, uci):
                     return True
+                engine.anticipate(board.board, config.lines)
                 state = State.AWAITING_OPP
                 continue
 
@@ -118,8 +114,7 @@ def play_session(config: Config) -> bool:
                 continue
 
             opp_fail_streak = 0
-            board.push_opp_move(mv.uci())
-            board.commit_pos_baseline()
+            board.complete_opp_move(mv.uci())
             state = State.OUR_TURN
 
         return False

@@ -104,6 +104,19 @@ class BoardSession:
         """Snapshot the current YOLO position as the next diff baseline."""
         self.prev_pos = np.copy(self.pos)
 
+    def complete_our_move(self):
+        """After our move has rendered on screen: sync diff baseline,
+        start opp's clock, snapshot pos for the next diff."""
+        self.sync_diff_baseline()
+        self.start_opp_move_time()
+        self.commit_pos_baseline()
+
+    def complete_opp_move(self, uci: str):
+        """After opp's move has been parsed and validated: push to
+        chess.Board (which sets obvious_move), snapshot pos baseline."""
+        self.push_opp_move(uci)
+        self.commit_pos_baseline()
+
     def game_over(self):
         return self.board.is_game_over() if self.board else False
 
