@@ -80,8 +80,8 @@ def play_our_move(board: BoardSession, engine: Engine, config: Config) -> bool:
     return False
 
 
-def play_session(config: Config) -> tuple[BoardSession, bool]:
-    """Run one attach-to-restart session. Returns (board, restart_requested)."""
+def play_session(config: Config) -> bool:
+    """Run one attach-to-restart session. Returns True if a restart is needed."""
     board = BoardSession(config)
     engine = Engine(config.time_control.skill_level)
     try:
@@ -93,7 +93,7 @@ def play_session(config: Config) -> tuple[BoardSession, bool]:
         while config.game_running and not board.game_over():
             if state is State.OUR_TURN:
                 if play_our_move(board, engine, config):
-                    return board, True
+                    return True
                 state = State.AWAITING_OPP
                 continue
 
@@ -111,7 +111,7 @@ def play_session(config: Config) -> tuple[BoardSession, bool]:
             if mv is None:
                 opp_fail_streak += 1
                 if opp_fail_streak >= OPP_FAIL_LIMIT:
-                    return board, True
+                    return True
                 time.sleep(IDLE_SLEEP)
                 continue
 
@@ -120,7 +120,7 @@ def play_session(config: Config) -> tuple[BoardSession, bool]:
             board.switch_turn()
             state = State.OUR_TURN
 
-        return board, False
+        return False
     finally:
         engine.quit()
 
@@ -131,7 +131,7 @@ def run(config: Config, stop_game: Callable[[], None] | None = None) -> None:
     try:
         while config.game_running and restart_count <= MAX_RESTARTS:
             try:
-                _, restart = play_session(config)
+                restart = play_session(config)
             except Exception:
                 restart_count += 1
                 continue

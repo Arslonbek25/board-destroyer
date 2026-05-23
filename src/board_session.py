@@ -14,13 +14,11 @@ from vision import getBoardCorners
 class BoardSession:
     IMG_SIZE = 640
 
-    def __init__(self, config=None, util=False):
-        if not util:
-            self.config = config
-            self.color = config.color
-            self.turn = config.color
-            self.clock = Clock(config)
-            self.opp_move_time = self.config.time_control.min_time
+    def __init__(self, config):
+        self.color = config.color
+        self.turn = config.color
+        self.clock = Clock(config)
+        self.opp_move_time = config.time_control.min_time
         self.sct = mss.mss()
         self._init_board()
         self.prev_pos = None
@@ -104,9 +102,8 @@ class BoardSession:
     def start_opp_move_time(self):
         self.opp_move_start_time = time.time()
 
-    def switch_turn(self, is_first_run=False):
-        if not is_first_run:
-            self.turn = Color.BLACK if self.turn == Color.WHITE else Color.WHITE
+    def switch_turn(self):
+        self.turn = Color.BLACK if self.turn == Color.WHITE else Color.WHITE
         self.prev_pos = np.copy(self.pos)
 
     def game_over(self):

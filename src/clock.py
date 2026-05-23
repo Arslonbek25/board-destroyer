@@ -63,17 +63,3 @@ class Clock:
             return self.tc.min_time + (max_time - self.tc.min_time) * np.exp(
                 self.k * (max_time - opponents_move_time)
             )
-
-
-if __name__ == "__main__":
-    c = Clock("puzzle")
-    for i in range(4):
-        opp = random.uniform(0.1, 0.1)
-        bot = c.calculate_move_time(opp, 20)
-        print(
-            f"Opponent {round(opp, 2)}s",
-            f"Bot {round(bot, 2)}s",
-        )
-    s = c.opponent_total_time / c.bot_total_time
-    print(round(s, 2), "second advantage")
-    print(f"Time advantage {round((s - 1) * 100, 2)}%")

@@ -1,6 +1,5 @@
 import numpy as np
 import pyautogui as pg
-import time
 
 from config import Color
 
@@ -29,7 +28,7 @@ def focus(board) -> None:
     pg.click(board.corners[0, 0], board.corners[0, 1])
 
 
-def play_move(board, move: str):
+def play_move(board, move: str) -> None:
     move_coords = move_to_pixels(move, board)
 
     move_coords[:2] += board.corners[0] - board.sq_size
@@ -37,14 +36,10 @@ def play_move(board, move: str):
 
     move_coords /= board.scale
     x1, y1, x2, y2 = move_coords
-    
-    t0 = time.perf_counter()
+
     pg.moveTo(x1, y1)
     pg.dragTo(x2, y2, button="left")
     promotion = "qnrb".find(move.lower()[-1])
     if promotion != -1:
         pg.moveTo(x2, y2 + promotion * board.sq_size)
         pg.click()
-    t1 = time.perf_counter()
-    
-    return (t1 - t0) * 1000
