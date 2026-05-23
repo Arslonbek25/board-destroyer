@@ -47,7 +47,8 @@ def parse_opp_move(prev_pos, pos, chess_board) -> chess.Move | None:
     return mv
 
 
-def play_our_move(board: BoardSession, engine: Engine, config: Config) -> None:
+def play_our_move(board: BoardSession, engine: Engine, config: Config) -> bool:
+    """Play our move. Returns True if render verification failed (restart)."""
     best_move = None
     if board.board.move_stack:
         best_move = engine.try_anticipated(board.board.move_stack[-1])
@@ -69,13 +70,14 @@ def play_our_move(board: BoardSession, engine: Engine, config: Config) -> None:
             break
         time.sleep(RENDER_RETRY_SLEEP)
     if not np.array_equal(board.pos, expected_pos):
-        board.pos = expected_pos
+        return True
 
     board.sync_diff_baseline()
     board.start_opp_move_time()
     board.switch_turn()
 
     engine.anticipate(board.board, config.lines)
+    return False
 
 
 def play_session(config: Config) -> tuple[BoardSession, bool]:
@@ -90,7 +92,8 @@ def play_session(config: Config) -> tuple[BoardSession, bool]:
 
         while config.game_running and not board.game_over():
             if state is State.OUR_TURN:
-                play_our_move(board, engine, config)
+                if play_our_move(board, engine, config):
+                    return board, True
                 state = State.AWAITING_OPP
                 continue
 
