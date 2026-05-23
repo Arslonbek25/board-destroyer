@@ -27,15 +27,25 @@ class Engine:
         )
         return str(result.move)
 
-    def try_anticipated(self, last_move: chess.Move) -> str | None:
-        """If anticipation hit a line starting with last_move, return its next ply."""
+    def try_anticipated(
+        self, last_move: chess.Move, board: chess.Board | None = None
+    ) -> str | None:
+        """If anticipation hit a line starting with last_move, return its next ply.
+
+        If `board` is provided, the returned ply is also checked for legality
+        against it — a cheap guard against snapshot drift if anticipation was
+        run on a slightly-stale position.
+        """
         if self._calc_thread is None:
             return None
         self._calc_thread.join()
         self._calc_thread = None
         for line in self._top_lines:
             if line and line[0] == last_move and len(line) > 1:
-                return str(line[1])
+                ply = line[1]
+                if board is not None and ply not in board.legal_moves:
+                    return None
+                return str(ply)
         return None
 
     def anticipate(self, board: chess.Board, lines: int) -> None:

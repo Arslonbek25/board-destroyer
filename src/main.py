@@ -51,7 +51,9 @@ def play_our_move(board: BoardSession, engine: Engine, config: Config) -> bool:
     """Play our move. Returns True if render verification failed (restart)."""
     best_move = None
     if board.board.move_stack:
-        best_move = engine.try_anticipated(board.board.move_stack[-1])
+        best_move = engine.try_anticipated(
+            board.board.move_stack[-1], board=board.board
+        )
 
     if best_move is None:
         t = None if board.clock.tc.depth else board.get_move_time()

@@ -45,57 +45,17 @@ def find_pieces(board):
 
     res = model.predict(img, verbose=False)[0]
     coords = res.boxes.xyxy.numpy().astype(int)[:, 0:2]
-    labels = res.boxes.cls.tolist() if hasattr(res.boxes.cls, "tolist") else list(res.boxes.cls)
+    labels = res.boxes.cls.tolist()
     board_height, board_width, _ = img.shape
-    for i in range(len(coords)):
-        x, y = coords[i]
-        posX = int(8 * x / board_width)
-        posY = int(8 * y / board_height)
 
-        if posX < 0:
-            posX = 0
-        elif posX > 7:
-            posX = 7
-
-        if posY < 0:
-            posY = 0
-        elif posY > 7:
-            posY = 7
-
-        raw_label = labels[i] if i < len(labels) else None
-        label_id = None
-        label_name = None
-
-        if isinstance(raw_label, (int,)):
-            label_id = int(raw_label)
-        elif isinstance(raw_label, str):
-            s = raw_label.strip()
-            if s.isdigit():
-                label_id = int(s)
-            else:
-                label_name = s
-        else:
-            try:
-                label_id = int(raw_label)
-            except Exception:
-                label_name = str(raw_label)
-
-        if label_id is not None and label_name is None:
-            try:
-                label_name = model.names.get(label_id) if isinstance(model.names, dict) else None
-            except Exception:
-                label_name = None
-
-        piece = None
-        if label_id is not None:
-            piece = piece_names_by_id.get(label_id)
-        elif label_name is not None:
-            piece = piece_names.get(label_name, label_name)
-
+    for (x, y), raw_label in zip(coords, labels):
+        posX = max(0, min(7, int(8 * x / board_width)))
+        posY = max(0, min(7, int(8 * y / board_height)))
+        piece = piece_names_by_id.get(int(raw_label))
         if piece is None:
             continue
-
         pos[posY, posX] = piece
+
     if board.color == Color.BLACK:
         pos = np.flip(pos, axis=(0, 1))
     return pos

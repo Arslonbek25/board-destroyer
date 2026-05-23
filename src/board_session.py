@@ -77,13 +77,12 @@ class BoardSession:
         )
 
     def set_fen(self, fen):
+        # One-shot: subsequent calls are silently ignored. Vision-derived FEN
+        # has no reliable castling info; chess.Board infers what it can from
+        # piece placement, which is the most we can do without history.
         if self.board is None:
             self.board = chess.Board()
             self.board.set_fen(fen)
-            try:
-                self.board.set_castling_fen("KQkq")
-            except ValueError:
-                pass
 
     def get_move_time(self):
         if self.obvious_move:
@@ -119,7 +118,7 @@ class BoardSession:
         return self.board.turn == we_are_white
 
     def push_our_move(self, uci: str) -> None:
-        mv, is_capture = self._push(uci)
+        _, is_capture = self._push(uci)
         self.obvious_move = is_capture
 
     def push_opp_move(self, uci: str) -> None:
@@ -151,7 +150,9 @@ class BoardSession:
             try:
                 self._find_board()
                 return
-            except Exception:
+            except ValueError:
+                # vision.getBoardCorners raises ValueError when the contour
+                # isn't a 4-corner square — transient during page render.
                 time.sleep(0.1)
         raise RuntimeError("could not find chess board on screen after 30 attempts")
 
