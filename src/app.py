@@ -3,7 +3,7 @@ import threading
 from nicegui import app, ui
 
 from config import Color, Config
-from main import run
+from game_loop import run
 
 
 class BoardDestroyer:
